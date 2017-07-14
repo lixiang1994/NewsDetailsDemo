@@ -1,0 +1,87 @@
+
+html{
+    width:100%%;
+    height:100%%;
+    margin:0 auto;
+    padding:0;
+    background-color:%@;
+    color:%@;
+}
+
+body{
+    width:100%%;
+    height:100%%;
+    margin:0 auto;
+    padding:0;
+    font-size:%@px;
+    line-height:1.7;
+    background-color:transparent;
+    word-wrap:break-word;
+    outline: 0;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    overflow-y: scroll;
+}
+
+div.content{
+    padding:0;
+    width:auto;
+    height:auto;
+    overflow:hidden;
+    background-color:transparent;
+}
+
+p{
+    margin-left:15;
+    margin-right:15;
+}
+
+div.image{
+    margin-left:15;
+    margin-right:15;
+    position:relative;
+    text-align: center;
+    vertical-align: middle;
+    background-color: #DCDCDC4C;
+}
+
+img.image{
+    width:100%%;
+    height:auto;
+    text-align:center;
+    border:0;
+    padding:0;
+}
+
+img#defaultscale{
+    
+    padding-top: 50%%;
+}
+
+div.progress{
+    z-index:3;
+    position:absolute;
+    -webkit-transition: width 1s;
+    border:0;
+    padding:0;
+}
+
+span.load{
+    position: absolute;
+    box-sizing: border-box;
+    width: 80%%;
+    height: 100px;
+    line-height: 100px;
+    text-align: center;
+    font-size: 5vw;
+    font-family: '黑体';
+    font-weight: bold;
+    left: 50%%;
+    top: 50%%;
+    margin-top:-50px;
+    margin-left:-40%%;
+    color: #999999;
+    z-index: 2;
+}
