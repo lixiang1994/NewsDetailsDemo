@@ -114,6 +114,13 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
     [self loadData];
 }
 
+- (void)viewDidLayoutSubviews{
+    
+    [super viewDidLayoutSubviews];
+    
+    [self.headerView updateHeight];
+}
+
 #pragma mark - 设置NavigationBar
 
 - (void)configNavigationBar{
@@ -152,10 +159,6 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
 - (void)initSubview{
     
     _moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    
-    [_moreButton setImage:[UIImage imageNamed:@"infor_nav_more_nor"] forState:UIControlStateNormal];
-    
-    [_moreButton setImage:[UIImage imageNamed:@"infor_nav_more_pre"] forState:UIControlStateHighlighted];
     
     [_moreButton addTarget:self action:@selector(moreButtonAction) forControlEvents:UIControlEventTouchUpInside];
     
@@ -223,6 +226,12 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
     self.view.lee_theme
     .LeeAddBackgroundColor(THEME_DAY, HEX_FFFFFF)
     .LeeAddBackgroundColor(THEME_NIGHT, HEX_252525);
+    
+    self.moreButton.lee_theme
+    .LeeAddButtonImage(THEME_DAY, [UIImage imageNamed:@"infor_nav_more_nor"], UIControlStateNormal)
+    .LeeAddButtonImage(THEME_DAY, [UIImage imageNamed:@"infor_nav_more_pre"], UIControlStateHighlighted)
+    .LeeAddButtonImage(THEME_NIGHT, [UIImage imageNamed:@"infor_nav_more_white_nor"], UIControlStateNormal)
+    .LeeAddButtonImage(THEME_NIGHT, [UIImage imageNamed:@"infor_nav_more_white_pre"], UIControlStateHighlighted);
     
     self.tableView.lee_theme
     .LeeAddBackgroundColor(THEME_DAY, HEX_FFFFFF)
@@ -589,11 +598,17 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
 
 - (void)openFontSize{
     
+    __weak typeof(self) weakSelf = self;
+    
     FontSizeView *view = [[FontSizeView alloc] init];
+    
+    view.currentIndex = [ContentManager fontLevel];
     
     view.changeBlock = ^(NSInteger level){
         
+        if (!weakSelf) return ;
         
+        [weakSelf.headerView configFontLevel:level];
     };
     
     [LEEAlert actionsheet].config

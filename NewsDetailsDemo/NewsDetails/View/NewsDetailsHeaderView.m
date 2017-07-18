@@ -14,8 +14,6 @@
 
 #import "WebKitSupport.h"
 
-#import "ContentManager.h"
-
 #import "PhotoBrowser.h"
 
 @interface NewsDetailsHeaderView ()<WKUIDelegate , WKNavigationDelegate , WKScriptMessageHandler>
@@ -30,11 +28,11 @@
 
 @property (nonatomic , strong ) WKWebView *webView; //内容webview
 
-
-
 @property (nonatomic , strong ) NSMutableArray *imageInfoArray; //图片信息数组
 
 @property (nonatomic , strong ) WeakScriptMessageDelegate *scriptDelegate; // 脚本代理
+
+@property (nonatomic , strong ) CADisplayLink *displayLink;
 
 @end
 
@@ -47,6 +45,10 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
 - (void)dealloc{
     
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
+    [_displayLink invalidate];
+    
+    _displayLink = nil;
     
     if (_webView) {
         
@@ -66,6 +68,8 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
     }
     
     _scriptDelegate = nil;
+    
+    _imageInfoArray = nil;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -110,27 +114,6 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
     if (!self.webView.title) [self.webView reload];
 }
 
-#pragma mark - 改变字体通知
-
-- (void)changeFontSizeNotify:(NSNotification *)notify{
-    
-    NSInteger fontSize = [ContentManager fontSize:16.0f + 2 * 2];
-    
-    NSString *js = [NSString stringWithFormat:@"configFontSize('%ld')" , fontSize];
-    
-    //设置字体大小
-    
-    __weak typeof(self) weakSelf = self;
-    
-    [self.webView evaluateJavaScript:js completionHandler:^(id _Nullable response, NSError * _Nullable error) {
-        
-        //更新webview高度
-        
-        if (weakSelf) [weakSelf updateWebViewHeight];
-    }];
-    
-}
-
 #pragma mark - 初始化数据
 
 - (void)initData{
@@ -140,6 +123,12 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
     _scriptDelegate = [[WeakScriptMessageDelegate alloc] initWithDelegate:self];
     
     _imageInfoArray = [NSMutableArray array];
+    
+    _displayLink = [CADisplayLink displayLinkWithTarget:[YYWeakProxy proxyWithTarget:self] selector:@selector(updateWebViewVisible)];
+    
+    _displayLink.paused = YES;
+    
+    [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
 }
 
 #pragma mark - 初始化子视图
@@ -227,7 +216,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
 
 - (void)configAutoLayout{
     
-    ///头部视图
+    // 头部视图
     
     _headerView.sd_layout
     .topSpaceToView(self, 0.0f)
@@ -284,6 +273,13 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
     
 }
 
+- (void)layoutSubviews{
+    
+    [super layoutSubviews];
+    
+    NSLog(@"%@" , [NSValue valueWithCGRect:self.frame]);
+}
+
 #pragma mark - 设置主题
 
 - (void)configTheme{
@@ -319,13 +315,9 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
         
         if (webView.URL) {
             
-            // 设置背景颜色
+            // 设置样式类型
             
-            [webView evaluateJavaScript:@"configBackgroundColor('ffffff')" completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
-            
-            // 设置字体颜色
-            
-            [weakSelf.webView evaluateJavaScript:@"configFontColor('333333')" completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
+            [webView evaluateJavaScript:@"configStyle('0');" completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
         }
         
     })
@@ -333,15 +325,11 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
         
         if (!weakSelf) return ;
             
-        if (weakSelf.webView.URL) {
+        if (webView.URL) {
             
-            // 设置背景颜色
+            // 设置样式类型
             
-            [weakSelf.webView evaluateJavaScript:@"configBackgroundColor('252525')" completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
-            
-            // 设置字体颜色
-            
-            [weakSelf.webView evaluateJavaScript:@"configFontColor('777777')" completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
+            [webView evaluateJavaScript:@"configStyle('1');" completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
         }
         
     });
@@ -395,6 +383,11 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
         
         if (!strongSelf) return ;
         
+        NSString *styleType = [[LEETheme currentThemeTag] isEqualToString:THEME_DAY] ? @"white" : @"black";
+        
+        CGFloat maxWidth = (CGRectGetWidth([[UIScreen mainScreen] bounds]) < CGRectGetHeight([[UIScreen mainScreen] bounds]) ? CGRectGetWidth([[UIScreen mainScreen] bounds]) : CGRectGetHeight([[UIScreen mainScreen] bounds])) - 30.0f;
+        
+        
         NSMutableString *contentHTMLString = [[NSMutableString alloc] initWithString:htmlString];
         
         NSString *imgRegex = @"(<img.*?>) | (<img.*?></img>) "; //img标签正则表达式
@@ -420,115 +413,111 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
                 
                 NSString *imgHtml = [htmlString substringWithRange:[match rangeAtIndex:0]];
                 
-                NSArray *tmpArray = nil;
+                NSString *src = [weakSelf getElementAttributeValueWithElement:imgHtml Attribute:@"src"];
                 
-                if ([imgHtml rangeOfString:@"src=\""].location != NSNotFound) {
-                    
-                    tmpArray = [imgHtml componentsSeparatedByString:@"src=\""];
-                    
-                } else if ([imgHtml rangeOfString:@"src="].location != NSNotFound) {
-                    
-                    tmpArray = [imgHtml componentsSeparatedByString:@"src="];
-                }
+                NSString *width = [weakSelf getElementAttributeValueWithElement:imgHtml Attribute:@"width"];
                 
-                if (tmpArray.count >= 2) {
+                NSString *height = [weakSelf getElementAttributeValueWithElement:imgHtml Attribute:@"height"];
+                
+                if (src) {
                     
-                    NSString *src = tmpArray[1];
+                    ContentImageLoadState state = 0;
                     
-                    NSUInteger loc = [src rangeOfString:@"\""].location;
+                    BOOL gif = [src hasSuffix:@".gif"];
                     
-                    if (loc != NSNotFound) {
+                    // 获取缩略图Url
+                    
+                    NSString *thumbnail = [src stringByAppendingFormat:@"?x-oss-process=image/format,jpg/resize,w_%.0f" , maxWidth];
+                    
+                    // 获取原图Url
+                    
+                    NSString *original = src;
+                    
+                    // 查询原图缓存
+                    
+                    NSString *originalPath = [ContentManager getCacheImageFilePathWithUrl:original];
+                    
+                    // 查询缩略图缓存
+                    
+                    NSString *thumbnailPath = [ContentManager getCacheImageFilePathWithUrl:thumbnail];
+                    
+                    // 组装新标签
+                    
+                    NSMutableString *imageString = [[NSMutableString alloc] init];
+                    
+                    [imageString appendFormat:@"<div class=\"image %@\">" , styleType];
+                    
+                    [imageString appendFormat:@"<img class=\"image %@\"" , styleType];
+                    
+                    if (originalPath) {
                         
-                        src = [src substringToIndex:loc];
+                        // 设置缓存图片路径
                         
-                        NSLog(@"正确解析出来的SRC为：%@", src);
+                        [imageString appendFormat:@" src=\"%@\"" , [NSURL fileURLWithPath:originalPath].absoluteString];
                         
-                        if (src.length > 0) {
-                            
-                            ContentImageLoadState state = 0;
-                            
-                            BOOL gif = [src hasSuffix:@".gif"];
-                            
-                            // 获取缩略图Url
-                            
-                            NSString *thumbnail = [src stringByAppendingFormat:@"?x-oss-process=image/format,jpg/resize,w_%.0f" , [UIScreen mainScreen].bounds.size.width];
-                            
-                            // 获取原图Url
-                            
-                            NSString *original = src;
-                            
-                            // 查询原图缓存
-                            
-                            NSString *originalPath = [ContentManager getCacheImageFilePathWithUrl:original];
-                            
-                            // 查询缩略图缓存
-                            
-                            NSString *thumbnailPath = [ContentManager getCacheImageFilePathWithUrl:thumbnail];
-                            
-                            // 组装新标签
-                            
-                            NSMutableString *imageString = [[NSMutableString alloc] init];
-                            
-                            [imageString appendString:@"<div class=\"image\">"];
-                            
-                            [imageString appendString:@"<img class=\"image\""];
-                            
-                            if (originalPath) {
-                                
-                                // 设置缓存图片路径
-                                
-                                [imageString appendFormat:@" src=\"%@\"" , [NSURL fileURLWithPath:originalPath].absoluteString];
-                                
-                                // 设置状态
-                                
-                                state = 4;
-                                
-                            } else if (thumbnailPath) {
-                                
-                                // 设置缓存图片路径
-                                
-                                [imageString appendFormat:@" src=\"%@\"" , [NSURL fileURLWithPath:thumbnailPath].absoluteString];
-                                
-                                // 设置状态
-                                
-                                state = gif ? ContentImageLoadStateGif : ContentImageLoadStateFinish;
-                                
-                            } else {
-                                
-                                // 设置缓存图片路径
-                                
-                                [imageString appendFormat:@" src=\"\""];
-                                
-                                // 设置状态
-                                
-                                state = [ContentManager isLoadImage] ? ContentImageLoadStateInitial : ContentImageLoadStateClick;
-                            }
-                            
-                            [imageString appendFormat:@" data-gif=\"%d\"" , gif];
-                            
-                            [imageString appendFormat:@" data-thumbnail=\"%@\"" , thumbnail];
-                            
-                            [imageString appendFormat:@" data-original=\"%@\"" , original];
-                            
-                            [imageString appendFormat:@" data-state=\"%ld\"" , state];
-                            
-                            [imageString appendFormat:@" id=\"%@\"" , state < 4 ? @"defaultscale" : @""];
-                            
-                            [imageString appendString:@"/>"];
-                            
-                            [imageString appendFormat:@"<span class=\"load\"></span>"];
-                            
-                            [imageString appendString:@"</div>"];
-                            
-                            NSString *imgString = [htmlString substringWithRange:[match range]]; // 原img标签字符串
-                            
-                            // 替换原有标签
-                            
-                            [contentHTMLString replaceCharactersInRange:[contentHTMLString rangeOfString:imgString] withString:imageString];
-                        }
+                        // 设置状态
                         
+                        state = 4;
+                        
+                    } else if (thumbnailPath) {
+                        
+                        // 设置缓存图片路径
+                        
+                        [imageString appendFormat:@" src=\"%@\"" , [NSURL fileURLWithPath:thumbnailPath].absoluteString];
+                        
+                        // 设置状态
+                        
+                        state = gif ? ContentImageLoadStateGif : ContentImageLoadStateFinish;
+                        
+                    } else {
+                        
+                        // 设置缓存图片路径
+                        
+                        [imageString appendFormat:@" src=\"\""];
+                        
+                        // 设置状态
+                        
+                        state = [ContentManager isLoadImage] ? ContentImageLoadStateInitial : ContentImageLoadStateClick;
                     }
                     
+                    [imageString appendFormat:@" data-gif=\"%d\"" , gif];
+                    
+                    [imageString appendFormat:@" data-thumbnail=\"%@\"" , thumbnail];
+                    
+                    [imageString appendFormat:@" data-original=\"%@\"" , original];
+                    
+                    [imageString appendFormat:@" data-state=\"%ld\"" , state];
+                    
+                    if (width && height) {
+                        
+                        CGFloat w = [width floatValue];
+                        
+                        CGFloat h = [height floatValue];
+                        
+                        CGFloat ratio = h / w;
+                        
+                        [imageString appendFormat:@" width=\"%.0f\"" , maxWidth];
+                        
+                        [imageString appendFormat:@" height=\"%.0f\"" , ratio * maxWidth];
+                        
+                    } else {
+                        
+                        [imageString appendFormat:@" width=\"%.0f\"" , maxWidth];
+                        
+                        [imageString appendFormat:@" height=\"auto\""];
+                    }
+                    
+                    [imageString appendString:@"/>"];
+                    
+                    [imageString appendFormat:@"<span class=\"load\"></span>"];
+                    
+                    [imageString appendString:@"</div>"];
+                    
+                    NSString *imgString = [htmlString substringWithRange:[match range]]; // 原img标签字符串
+                    
+                    // 替换原有标签
+                    
+                    [contentHTMLString replaceCharactersInRange:[contentHTMLString rangeOfString:imgString] withString:imageString];
                 }
                 
                 index ++;
@@ -536,22 +525,10 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
             
         }
         
-        NSString *backgroundColor = [[LEETheme currentThemeTag] isEqualToString:THEME_DAY] ? HEX_FFFFFF : HEX_252525;
-        
-        NSString *fontColor = [[LEETheme currentThemeTag] isEqualToString:THEME_DAY] ? HEX_252525 : HEX_777777;
-        
-        NSString *fontSize = [NSString stringWithFormat:@"%.0f" , [ContentManager fontSize:16.0f + 2 * 2]];
-        
-        NSString *webContentStyleCSS = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"WebContentStyle" ofType:@"css"] encoding:NSUTF8StringEncoding error:NULL];
-        
-        NSString *webContentStyleCSSPath = [[ContentManager getCachePath:@"css"] stringByAppendingPathComponent:@"WebContentStyle.css"];
-        
-        webContentStyleCSS = [NSString stringWithFormat:webContentStyleCSS , backgroundColor , fontColor , fontSize];
-        
-        [webContentStyleCSS writeToFile:webContentStyleCSSPath atomically:YES encoding:NSUTF8StringEncoding error:NULL];
+        NSString *fontSize = [NSString stringWithFormat:@"%.0f" , [ContentManager fontSize:16.0f + [ContentManager fontLevel] * 2]];
         
         NSString *frame = [NSString stringWithFormat:@"\
-                           <html>\
+                           <html class=\"%@\">\
                            <head>\
                            <meta http-equiv =\"Content-Type\" content=\"text/html; charset=utf-8\"/>\
                            <meta name = \"viewport\" content=\"width = device-width, initial-scale = 1, user-scalable=no\"/>\
@@ -560,11 +537,11 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
                            <script src=\"../js/jquery-1.12.3.min.js\"></script>\
                            <script src=\"../js/radialIndicator.js\"></script>\
                            </head>\
-                           <body>\
+                           <body style=\"font-size:%@px;\">\
                            <div class=\"content\">%@</div>\
                            </body>\
                            <script src=\"../js/WebContentHandle.js\"></script>\
-                           </html>" , contentHTMLString];
+                           </html>" , styleType , fontSize , contentHTMLString];
         
         NSString *htmlPath = [[ContentManager getCachePath:@"html"] stringByAppendingPathComponent:@"newsContent.html"];
         
@@ -579,38 +556,48 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
     
 }
 
-#pragma mark - 更新webview高度
+#pragma mark - 获取HTML元素属性值
 
-- (void)updateWebViewHeight{
+- (NSString *)getElementAttributeValueWithElement:(NSString *)element Attribute:(NSString *)attribute{
     
-    __weak typeof(self) weakSelf = self;
-    
-    [self.webView evaluateJavaScript:@"getContentHeight()" completionHandler:^(id _Nullable response, NSError * _Nullable error) {
+    NSString *value = nil;
+ 
+    if (element && element.length && attribute && attribute.length) {
+     
+        // 去除空格
         
-        if (!weakSelf) return ;
+        element = [element stringByReplacingOccurrencesOfString:@" " withString:@""];
         
-        if (!error) {
+        NSArray *array = nil;
+        
+        if ([element rangeOfString:[NSString stringWithFormat:@"%@=\"" , attribute]].location != NSNotFound) {
             
-            CGFloat height = [response floatValue];
+            array = [element componentsSeparatedByString:[NSString stringWithFormat:@"%@=\"" , attribute]];
             
-            if (weakSelf.webView.height != height) {
+        } else if ([element rangeOfString:[NSString stringWithFormat:@"%@=" , attribute]].location != NSNotFound) {
+            
+            array = [element componentsSeparatedByString:[NSString stringWithFormat:@"%@=" , attribute]];
+        }
+        
+        if (array.count >= 2) {
+            
+            NSString *temp = array[1];
+            
+            NSUInteger loc = [temp rangeOfString:@"\""].location;
+            
+            if (loc != NSNotFound) {
                 
-                weakSelf.webView.sd_layout.heightIs(height);
+                temp = [temp substringToIndex:loc];
                 
-                [weakSelf updateLayout];
+                if (temp.length > 0) value = temp;
             }
             
         }
-
-    }];
-    
-    // 强行刷新内容
-    
-    if ([self.webView respondsToSelector:@selector(_updateVisibleContentRects)]) {
         
-        ((void(*)(id,SEL,BOOL))objc_msgSend)(self.webView, @selector(_updateVisibleContentRects),NO);
+        
     }
     
+    return value;
 }
 
 #pragma mark - 加载图片
@@ -633,7 +620,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
     
     dispatch_group_notify(group, dispatch_get_main_queue(), ^{
         
-        [self updateWebViewHeight];
+        [self updateHeight];
     });
 }
 
@@ -798,7 +785,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
     
     // 设置图片Url和完成状态
     
-    NSString *js = [NSString stringWithFormat:@"configImgState('%ld' , '%ld'); setImageUrl('%ld' , '%@'); getImageInfo('%ld');" , state , index , index , [NSURL fileURLWithPath:imagepath].absoluteString , index];
+    NSString *js = [NSString stringWithFormat:@"setImageUrl('%ld' , '%@'); configImgState('%ld' , '%ld'); getImageInfo('%ld');" , index , [NSURL fileURLWithPath:imagepath].absoluteString , state , index , index];
     
     [self.webView evaluateJavaScript:js completionHandler:^(id _Nullable response, NSError * _Nullable error) {
         
@@ -813,14 +800,77 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
         
         if (resultBlock) resultBlock();
         
-        dispatch_async(dispatch_get_main_queue(), ^{
-            
-            // 更新webview高度
-            
-            [weakSelf updateWebViewHeight];
-        });
+        // 更新webview高度
+        
+        [weakSelf updateHeight];
         
     }];
+    
+}
+
+- (void)updateWebViewVisible{
+    
+    // 刷新内容 (解决某些没有刷新的WKCompositingView)
+    
+    if ([self.webView respondsToSelector:@selector(_updateVisibleContentRects)]) {
+        
+        ((void(*)(id,SEL,BOOL))objc_msgSend)(self.webView, @selector(_updateVisibleContentRects),NO);
+    }
+}
+
+#pragma mark - 设置字体等级
+
+- (void)configFontLevel:(NSInteger)level{
+    
+    [ContentManager setFontLevel:level];
+    
+    NSInteger fontSize = [ContentManager fontSize:16.0f + level * 2];
+    
+    NSString *js = [NSString stringWithFormat:@"configFontSize('%ld')" , fontSize];
+    
+    //设置字体大小
+    
+    __weak typeof(self) weakSelf = self;
+    
+    [self.webView evaluateJavaScript:js completionHandler:^(id _Nullable response, NSError * _Nullable error) {
+        
+        //更新webview高度
+        
+        if (weakSelf) [weakSelf updateHeight];
+    }];
+    
+}
+
+#pragma mark - 更新高度
+
+- (void)updateHeight{
+    
+    __weak typeof(self) weakSelf = self;
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        if (!weakSelf) return ;
+        
+        [weakSelf.webView evaluateJavaScript:@"getContentHeight()" completionHandler:^(id _Nullable response, NSError * _Nullable error) {
+            
+            if (!weakSelf) return ;
+            
+            if (!error) {
+                
+                CGFloat height = [response floatValue];
+                
+                if (weakSelf.webView.height != height) {
+                    
+                    weakSelf.webView.sd_layout.heightIs(height);
+                    
+                    [weakSelf updateLayout];
+                }
+                
+            }
+            
+        }];
+        
+    });
     
 }
 
@@ -965,13 +1015,9 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
         
         if (!error && response) {
             
-            NSLog(@"%@" , response);
-            
             [weakSelf.imageInfoArray removeAllObjects];
             
             [weakSelf.imageInfoArray addObjectsFromArray:[response copy]];
-            
-//            [weakSelf.imageUrlArray addObjectsFromArray:[response copy]];
             
             // 加载图片
             
@@ -982,35 +1028,11 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
     
     // 更新webview高度
     
-    [weakSelf updateWebViewHeight];
+    [weakSelf updateHeight];
+    
+    weakSelf.displayLink.paused = NO;
     
     if (weakSelf.loadedFinishBlock) weakSelf.loadedFinishBlock(YES);
-    
-    /*
-     
-     //设置字体大小
-     
-     [self.webView evaluateJavaScript:@"configFontSize('20')" completionHandler:^(id _Nullable response, NSError * _Nullable error) {
-     
-     Log(@"response: %@ error: %@", response, error);
-     }];
-     
-     //设置字体颜色
-     
-     [self.webView evaluateJavaScript:@"configFontColor('222222')" completionHandler:^(id _Nullable response, NSError * _Nullable error) {
-     
-     Log(@"response: %@ error: %@", response, error);
-     }];
-     
-     //设置图片大小
-     
-     [self.webView evaluateJavaScript:@"configImgSize('1' , '320' , '160')" completionHandler:^(id _Nullable response, NSError * _Nullable error) {
-     
-     Log(@"response: %@ error: %@", response, error);
-     }];
-     
-     */
-    
 }
 
 // 当main frame最后下载数据失败时，会回调

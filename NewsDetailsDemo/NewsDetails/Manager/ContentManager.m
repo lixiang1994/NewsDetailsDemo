@@ -24,6 +24,8 @@
     
     NSString *webContentHandleJSPath = [[ContentManager getCachePath:@"js"] stringByAppendingPathComponent:@"WebContentHandle.js"];
     
+    NSString *webContentStyleCSSPath = [[ContentManager getCachePath:@"css"] stringByAppendingPathComponent:@"WebContentStyle.css"];
+    
     // 写入临时缓存目录
     
     if (![[NSFileManager defaultManager] fileExistsAtPath:jqueryJSPath]) {
@@ -47,9 +49,16 @@
         [webContentHandleJS writeToFile:webContentHandleJSPath atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     }
     
+    if (![[NSFileManager defaultManager] fileExistsAtPath:webContentStyleCSSPath]) {
+        
+        NSString *webContentStyleCSS = [NSString stringWithContentsOfFile:[mainBundle pathForResource:@"WebContentStyle" ofType:@"css"] encoding:NSUTF8StringEncoding error:NULL];
+        
+        [webContentStyleCSS writeToFile:webContentStyleCSSPath atomically:YES encoding:NSUTF8StringEncoding error:NULL];
+    }
+    
     // 加载状态图片处理
     
-    NSArray *imageArray = @[@"load_image_gif_icon.png"];
+    NSArray *imageArray = @[@"load_image_gif_icon.png" , @"load_image.png"];
     
     for (NSString *imageName in imageArray) {
         
@@ -252,7 +261,7 @@
 
 + (BOOL)isLoadImage{
     
-    return YES;
+    return NO;
 }
 
 + (CGFloat)fontSize:(CGFloat)size{
@@ -289,6 +298,18 @@
     }
     
     return fontSize;
+}
+
++ (NSInteger)fontLevel{
+    
+    return [[NSUserDefaults standardUserDefaults] integerForKey:@"ud_fontlevel"];
+}
+
++ (void)setFontLevel:(NSInteger)level{
+    
+    [[NSUserDefaults standardUserDefaults] setInteger:level forKey:@"ud_fontlevel"];
+    
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 @end

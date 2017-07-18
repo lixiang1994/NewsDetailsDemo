@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+#import "ContentManager.h"
+
 #import "NewsDetailsModel.h"
 
 @interface NewsDetailsHeaderView : UIView
@@ -17,5 +19,9 @@
 @property (nonatomic , copy ) void (^loadedFinishBlock)(BOOL);//加载完成Block
 
 @property (nonatomic , copy ) void (^updateHeightBlock)(NewsDetailsHeaderView *view); //更新高度Block
+
+- (void)configFontLevel:(NSInteger)level;
+
+- (void)updateHeight;
 
 @end

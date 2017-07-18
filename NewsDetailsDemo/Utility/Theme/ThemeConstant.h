@@ -40,6 +40,8 @@
 
 #define HEX_252525 @"252525"
 
+#define HEX_303030 @"303030"
+
 #define HEX_E8E8E8 @"E8E8E8"
 
 #define HEX_1B1B1B @"1B1B1B"
@@ -47,6 +49,8 @@
 #define HEX_BBBBBB @"BBBBBB"
 
 #define HEX_F3F3F3 @"F3F3F3"
+
+#define HEX_D7D7D7 @"D7D7D7"
 
 #define HEX_F8F8F8 @"F8F8F8"
 

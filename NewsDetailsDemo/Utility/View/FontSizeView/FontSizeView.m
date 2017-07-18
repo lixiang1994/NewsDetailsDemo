@@ -27,9 +27,6 @@
 @end
 
 @implementation FontSizeView
-{
-    NSInteger currentIndex; //当前下标
-}
 
 - (void)dealloc{
     
@@ -72,8 +69,6 @@
     _promptLabelArray = [NSMutableArray array];
     
     self.backgroundColor = [UIColor colorWithRed:243/255.0 green:243/255.0 blue:243/255.0 alpha:1.0f];
- 
-    currentIndex = 1;
 }
 
 #pragma mark - 初始化子视图
@@ -104,7 +99,7 @@
     
     [_slider setMaximumValue:_promptInfoArray.count - 1];
     
-    [_slider setValue: currentIndex];
+    [_slider setValue: self.currentIndex];
     
     [_slider addTarget:self action:@selector(sliderChangeAction:) forControlEvents:UIControlEventValueChanged];
     
@@ -140,7 +135,7 @@
         
         label.textAlignment = NSTextAlignmentCenter;
         
-        label.alpha = currentIndex == i ? 1.0f : 0.0f;
+        label.alpha = self.currentIndex == i ? 1.0f : 0.0f;
         
         [self addSubview:label];
         
@@ -308,11 +303,11 @@
 
 - (void)sliderChangeAction:(UISlider *)slider{
     
-    [self.promptLabelArray[currentIndex] setAlpha:0.0f];
+    [self.promptLabelArray[self.currentIndex] setAlpha:0.0f];
     
-    currentIndex = [[self numberFormat:slider.value] integerValue];
+    _currentIndex = [[self numberFormat:slider.value] integerValue];
     
-    [self.promptLabelArray[currentIndex] setAlpha:1.0f];
+    [self.promptLabelArray[self.currentIndex] setAlpha:1.0f];
 }
 
 #pragma mark - 设置字体大小
@@ -322,6 +317,17 @@
     int sliderValue = (int)self.slider.value;
     
     if (self.changeBlock) self.changeBlock(sliderValue);
+}
+
+- (void)setCurrentIndex:(NSInteger)currentIndex{
+    
+    [self.promptLabelArray[_currentIndex] setAlpha:0.0f];
+    
+    _currentIndex = currentIndex;
+    
+    [self.promptLabelArray[_currentIndex] setAlpha:1.0f];
+    
+    self.slider.value = currentIndex;
 }
 
 - (void)show{

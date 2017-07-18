@@ -108,4 +108,8 @@ typedef NS_ENUM(NSInteger, ContentImageLoadState) {
  */
 + (CGFloat)fontSize:(CGFloat)size;
 
++ (NSInteger)fontLevel;
+
++ (void)setFontLevel:(NSInteger)level;
+
 @end

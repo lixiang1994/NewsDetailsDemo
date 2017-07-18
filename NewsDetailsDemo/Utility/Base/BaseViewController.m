@@ -36,7 +36,14 @@
             
         case NavigationBarStyleTypeWhite:
             
-            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:animated];
+            if ([[LEETheme currentThemeTag] isEqualToString:THEME_DAY]) {
+                
+                [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:animated];
+                
+            } else if ([[LEETheme currentThemeTag] isEqualToString:THEME_NIGHT]) {
+                
+                [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:animated];
+            }
             
             break;
             
@@ -57,6 +64,13 @@
     self.navigationController.navigationBar.translucent = NO;
     
     self.navigationController.navigationBar.hidden = YES;
+}
+
+- (void)viewDidLayoutSubviews{
+    
+    [super viewDidLayoutSubviews];
+    
+    if (_navigationBar) _navigationBar.frame = CGRectMake(0, 0, self.view.width, 64.0f);
 }
 
 #pragma mark - 初始化数据
@@ -109,7 +123,9 @@
             
         case NavigationBarStyleTypeWhite:
             
-            self.navigationBar.backgroundColor = [UIColor whiteColor];
+            self.navigationBar.lee_theme
+            .LeeAddBackgroundColor(THEME_DAY, HEX_FFFFFF)
+            .LeeAddBackgroundColor(THEME_NIGHT, HEX_303030);
             
             isLine = YES;
             
@@ -143,6 +159,10 @@
         .leftEqualToView(self.navigationBar)
         .rightEqualToView(self.navigationBar)
         .heightIs(0.5f);
+        
+        lineView.lee_theme
+        .LeeAddBackgroundColor(THEME_DAY, HEX_D7D7D7)
+        .LeeAddBackgroundColor(THEME_NIGHT, HEX_444444);
     }
     
     // 判断是否有返回按钮
@@ -159,9 +179,11 @@
         
         if (self.navigationBarStyleType == NavigationBarStyleTypeWhite) {
             
-            [backButton setImage:[UIImage imageNamed:@"infor_leftbackicon_nav_nor"] forState:UIControlStateNormal];
-            
-            [backButton setImage:[UIImage imageNamed:@"infor_leftbackicon_nav_pre"] forState:UIControlStateHighlighted];
+            backButton.lee_theme
+            .LeeAddButtonImage(THEME_DAY, [UIImage imageNamed:@"infor_leftbackicon_nav_nor"], UIControlStateNormal)
+            .LeeAddButtonImage(THEME_DAY, [UIImage imageNamed:@"infor_leftbackicon_nav_pre"], UIControlStateHighlighted)
+            .LeeAddButtonImage(THEME_NIGHT, [UIImage imageNamed:@"infor_leftbackicon_white_nor"], UIControlStateNormal)
+            .LeeAddButtonImage(THEME_NIGHT, [UIImage imageNamed:@"infor_leftbackicon_white_pre"], UIControlStateHighlighted);
             
         } else {
             

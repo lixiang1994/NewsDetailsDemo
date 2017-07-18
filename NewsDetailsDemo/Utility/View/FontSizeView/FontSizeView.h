@@ -12,6 +12,8 @@
 
 @property (nonatomic , copy ) void (^changeBlock)(NSInteger);
 
+@property (nonatomic , assign ) NSInteger currentIndex; //当前下标
+
 /** 显示 */
 
 - (void)show;

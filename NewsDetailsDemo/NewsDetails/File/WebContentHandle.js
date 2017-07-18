@@ -1,7 +1,11 @@
 
 $(function(){
   
-  var divs = $("body").find("div.image");
+  var body = $("body");
+  
+  body.css("webkitTextSizeAdjust" , "none");
+  
+  var divs = body.find("div.image");
   
   for(var i = 0; i < divs.length; i++){
   
@@ -140,7 +144,7 @@ function configImgState(state, index, className){
         case 0:
             
             // 初始状态
-            img.attr({"data-state":0 , "id":"defaultscale"});
+            img.attr({"data-state":0 , "src":"../defaultimage/load_image.png"});
             
             span.text("LEE");
             
@@ -148,7 +152,7 @@ function configImgState(state, index, className){
         case 1:
             
             // 加载中
-            img.attr({"data-state":1 , "id":"defaultscale"});
+            img.attr({"data-state":1 , "src":"../defaultimage/load_image.png"});
             
             span.text("加载中");
             
@@ -156,7 +160,7 @@ function configImgState(state, index, className){
         case 2:
             
             // 点击加载
-            img.attr({"data-state":2 , "id":"defaultscale"});
+            img.attr({"data-state":2 , "src":"../defaultimage/load_image.png"});
             
             span.text("点击加载");
             
@@ -164,7 +168,7 @@ function configImgState(state, index, className){
         case 3:
             
             // 加载失败
-            img.attr({"data-state":3 , "id":"defaultscale"});
+            img.attr({"data-state":3 , "src":"../defaultimage/load_image.png"});
             
             span.text("加载失败 点击加载");
             
@@ -172,7 +176,7 @@ function configImgState(state, index, className){
         case 4:
             
             // 状态置为4
-            img.attr({"data-state":4 , "id":""});
+            img.attr({"data-state":4});
             
             span.text("");
             
@@ -181,6 +185,11 @@ function configImgState(state, index, className){
             
             break;
         case 5:
+            
+            // 状态置为5
+            img.attr({"data-state":5 , "id":""});
+            
+            span.text("");
             
             // 移除原有进度条
             if (div.find('div.progress').length > 0){
@@ -206,32 +215,75 @@ function configImgState(state, index, className){
                 .appendTo(div);
             }
             
-            // 状态置为5
-            img.attr({"data-state":5 , "id":""});
-            
-            span.text("");
-            
             break;
     }
     
 }
 
 /**
- 移除图片属性
+ 设置元素属性
  
- @param index       下标 ('1')
- @param attr        属性名
- @param className   元素名称或id或class (选填 空为body)
+ @param element     元素名
+ @param attribute   属性名
+ @param value       属性值
  */
-function removeImgAttr(index , attr , className){
+function configElementsAttribute(element , attribute , value){
     
-    var o = className == undefined ? "body" : className;
+    $(element).attr(attribute , value);
+}
+
+/**
+ 移除元素属性
+ 
+ @param element     元素名
+ @param attribute   属性名
+ */
+function removeElementsAttribute(element , attribute){
     
-    var div = $(o).find("div.image").eq(parseFloat(index));
+    $(element).removeAttr(attribute);
+}
+
+/**
+ 设置样式
+ 
+ @param type       类型 (0 白色 , 1 黑色)
+ */
+function configStyle(type){
     
-    var img = div.find("img.image");
+    switch (parseFloat(type)) {
+            
+        case 0:
+            
+            // 白色
+            
+            $("html").removeClass("black");
+            $("html").addClass("white");
+            
+            $("div.image").removeClass("black");
+            $("div.image").addClass("white");
+            
+            $("img.image").removeClass("black");
+            $("img.image").addClass("white");
+            
+            break;
+            
+        case 1:
+            
+            // 黑色
+            
+            $("html").removeClass("white");
+            $("html").addClass("black");
+            
+            $("div.image").removeClass("white");
+            $("div.image").addClass("black");
+            
+            $("img.image").removeClass("white");
+            $("img.image").addClass("black");
+            
+            break;
+            
+    }
     
-    img.removeAttr(attr);
 }
 
 /**
@@ -363,7 +415,7 @@ function configLoadingProgress(index, progress, className){
                                               }).appendTo(div);
             
             radialIndicator.defaults.radius = 25;
-            radialIndicator.defaults.barBgColor = "#EEEEEE7F";
+            radialIndicator.defaults.barBgColor = "#EEEEEE";
             radialIndicator.defaults.barColor = "#EA1F1F";
             radialIndicator.defaults.fontColor = "#EEEEEE";
             radialIndicator.defaults.barWidth = 5;
