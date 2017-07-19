@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface PhotoBrowser : UIView
+@interface PhotoBrowser : NSObject
 
 /**
  图片Url数组
@@ -28,9 +28,42 @@
 /**
  加载完成回调
  */
-@property (nonatomic , copy ) void (^loadFinishBlock)(NSInteger index);
+@property (nonatomic , copy ) void (^loadFinishBlock)(PhotoBrowser *, NSInteger index);
+
+/**
+ 长按回调
+ */
+@property (nonatomic , copy ) void (^longClickBlock)(PhotoBrowser *, NSInteger index);
 
 + (PhotoBrowser *)browser;
+
+- (void)saveImageWithIndex:(NSInteger)index;
+
+- (void)show;
+
+@end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@interface PhotoBrowserViewController : UIViewController
+
+@property (nonatomic , strong ) PhotoBrowser *browser;
+
+- (void)saveImageWithIndex:(NSInteger)index;
 
 - (void)show;
 
@@ -39,6 +72,8 @@
 @interface PhotoBrowserCell : UICollectionViewCell
 
 @property (nonatomic , strong ) NSURL *url;
+
+@property (nonatomic , copy ) void (^longClickBlock)();
 
 @property (nonatomic , copy ) void (^loadFinishBlock)(NSURL *url , UIImage *image);
 

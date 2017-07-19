@@ -24,6 +24,11 @@
     
     [LEETheme defaultTheme:THEME_DAY];
     
+    // 兼容横屏显示状态栏
+    
+    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
+    [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationNone];
+    
     return YES;
 }
 

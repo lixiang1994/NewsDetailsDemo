@@ -10,23 +10,9 @@
 
 #import "HUD.h"
 
-@interface PhotoBrowser ()<UICollectionViewDelegate , UICollectionViewDataSource>
+static UIWindow *browserWindow;
 
-@property (nonatomic , strong ) UICollectionView *collectionView; //集合视图
-
-@property (nonatomic , strong ) UICollectionViewFlowLayout *flowLayout; //布局
-
-@property (nonatomic , strong ) UIView *topView;
-
-@property (nonatomic , strong ) UIView *bottomView;
-
-@property (nonatomic , strong ) UILabel *pageLable; //页码Label
-
-@property (nonatomic , strong ) UIButton *saveButton; //保存按钮
-
-@property (nonatomic , strong ) UIImageView *tempImageView; //临时视图
-
-@property (nonatomic , assign ) NSInteger currentIndex; //当前下标
+@interface PhotoBrowser ()
 
 @end
 
@@ -35,152 +21,11 @@
 - (void)dealloc{
     
     _imageUrlArray = nil;
-    
-    _collectionView = nil;
-    
-    _flowLayout = nil;
-    
-    _pageLable = nil;
-    
-    _saveButton = nil;
-    
-    _tempImageView = nil;
 }
 
 + (PhotoBrowser *)browser{
     
-    return [[PhotoBrowser alloc] init];
-}
-
-- (instancetype)init
-{
-    self = [super init];
-    if (self) {
-        
-        //初始化数据
-        
-        [self initData];
-        
-        //初始化视图
-        
-        [self initSubView];
-        
-        //设置自动布局
-        
-        [self configAutoLayout];
-        
-        //设置主题模式
-        
-        [self configTheme];
-        
-    }
-    return self;
-}
-
-#pragma mark - 初始化数据
-
-- (void)initData{
-    
-    self.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.0f];
-    
-    self.frame = CGRectMake(0, 0, CGRectGetWidth([[UIScreen mainScreen] bounds]), CGRectGetHeight([[UIScreen mainScreen] bounds]));
-}
-
-#pragma mark - 初始化子视图
-
-- (void)initSubView{
-    
-    // 初始化flowLayout
-    
-    _flowLayout = [[UICollectionViewFlowLayout alloc] init];
-    
-    // 设置单元格的左右最小间距
-    
-    _flowLayout.minimumInteritemSpacing = 0;
-    
-    // 设置单元格的上下最小间距
-    
-    _flowLayout.minimumLineSpacing = 0;
-    
-    // 设置滑动方向
-    
-    _flowLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
-    
-    // 设置边界
-    
-    _flowLayout.sectionInset = UIEdgeInsetsMake(0, 0, 0, 0);
-    
-    // 初始化集合视图
-    
-    _collectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height) collectionViewLayout:self.flowLayout];
-    
-    _collectionView.hidden = YES;
-    
-    _collectionView.pagingEnabled = YES;
-    
-    _collectionView.backgroundColor = [UIColor clearColor];
-    
-    _collectionView.delegate = self;
-    
-    _collectionView.dataSource = self;
-    
-    [_collectionView registerClass:[PhotoBrowserCell class] forCellWithReuseIdentifier:@"CELL"];
-    
-    [self addSubview:_collectionView];
-    
-    // 初始化顶部视图
-    
-    _topView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, 20.0f)];
-    
-    [self addSubview:_topView];
-    
-    // 初始化底部视图
-    
-    _bottomView = [[UIView alloc] initWithFrame:CGRectMake(0, self.frame.size.height - 80, self.frame.size.width, 80)];
-    
-    [_bottomView.layer addSublayer:[self shadowAsInverseWithSize:CGSizeMake(self.frame.size.width, 80)]];
-    
-    [self addSubview:_bottomView];
-    
-    // 初始化页码Label
-    
-    _pageLable = [[UILabel alloc] initWithFrame:CGRectMake(0, 30, self.frame.size.width, 20)];
-    
-    _pageLable.textColor = [UIColor whiteColor];
-    
-    _pageLable.font = [UIFont systemFontOfSize:16.0f];
-    
-    _pageLable.textAlignment = NSTextAlignmentCenter;
-    
-    [self.bottomView addSubview:_pageLable];
-    
-    //初始化保存按钮
-    
-    _saveButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    
-    _saveButton.hidden = YES;
-    
-    _saveButton.frame = CGRectMake(self.frame.size.width - 60.0f, 20.0f, 40.0f, 40.0f);
-    
-    [_saveButton setTitle:@"保存" forState:UIControlStateNormal];
-    
-    [_saveButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    
-    [_saveButton addTarget:self action:@selector(saveImageAction) forControlEvents:UIControlEventTouchUpInside];
-    
-    [self.bottomView addSubview:_saveButton];
-}
-
-#pragma mark - 设置自动布局
-
--(void)configAutoLayout{
-    
-}
-
-#pragma mark - 设置主题
-
-- (void)configTheme{
-    
+    return [[PhotoBrowser alloc] init];;
 }
 
 #pragma mark - 获取图片Url数组
@@ -219,35 +64,247 @@
     
 }
 
+- (void)saveImageWithIndex:(NSInteger)index{
+    
+    if (browserWindow && browserWindow.rootViewController) {
+        
+        PhotoBrowserViewController *vc = (PhotoBrowserViewController *)browserWindow.rootViewController;
+        
+        [vc saveImageWithIndex:index];
+    }
+    
+}
+
+- (void)show{
+    
+    if (!_imageUrlArray.count) return;
+    
+    if (!browserWindow) browserWindow = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    
+    PhotoBrowserViewController *vc = [[PhotoBrowserViewController alloc] init];
+    
+    vc.browser = self;
+    
+    browserWindow.rootViewController = vc;
+    
+    browserWindow.hidden = NO;
+    
+    [browserWindow makeKeyAndVisible];
+    
+    [vc show];
+}
+
+@end
+
+@interface PhotoBrowserViewController ()<UICollectionViewDelegate , UICollectionViewDataSource>
+
+@property (nonatomic , strong ) UICollectionView *collectionView; //集合视图
+
+@property (nonatomic , strong ) UICollectionViewFlowLayout *flowLayout; //布局
+
+@property (nonatomic , strong ) UIView *topView; //顶部视图
+
+@property (nonatomic , strong ) UIView *bottomView; //底部视图
+
+@property (nonatomic , strong ) UILabel *pageLable; //页码
+
+@property (nonatomic , strong ) UIButton *saveButton; //保存按钮
+
+@property (nonatomic , strong ) UIImageView *tempImageView; //临时视图
+
+@property (nonatomic , assign ) NSInteger currentIndex; //当前下标
+
+@end
+
+@implementation PhotoBrowserViewController
+
+- (void)dealloc{
+    
+    _collectionView = nil;
+    
+    _flowLayout = nil;
+    
+    _pageLable = nil;
+    
+    _saveButton = nil;
+    
+    _tempImageView = nil;
+}
+
+- (void)viewDidLoad{
+    
+    [super viewDidLoad];
+    
+    // 初始化数据
+    
+    [self initData];
+    
+    // 初始化视图
+    
+    [self initSubView];
+    
+    // 设置自动布局
+    
+    [self configAutoLayout];
+    
+    // 设置主题模式
+    
+    [self configTheme];
+    
+}
+
+- (void)viewDidLayoutSubviews{
+    
+    [super viewDidLayoutSubviews];
+    
+    _collectionView.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
+    
+    [_collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.currentIndex inSection:0] atScrollPosition:UICollectionViewScrollPositionNone animated:NO];
+    
+    [_flowLayout invalidateLayout];
+    
+    _topView.frame = CGRectMake(0, 0, self.view.frame.size.width, 20.0f);
+    
+    _bottomView.frame = CGRectMake(0, self.view.frame.size.height - 80, self.view.frame.size.width, 80);
+    
+    if ([_bottomView.layer.sublayers.firstObject isKindOfClass:CAGradientLayer.class]) _bottomView.layer.sublayers.firstObject.frame = _bottomView.bounds;
+    
+    _pageLable.frame = CGRectMake(0, 30, self.view.frame.size.width, 20);
+    
+    _saveButton.frame = CGRectMake(self.view.frame.size.width - 60.0f, 20.0f, 40.0f, 40.0f);
+}
+
+#pragma mark - 初始化数据
+
+- (void)initData{
+    
+    self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.0f];
+}
+
+#pragma mark - 初始化子视图
+
+- (void)initSubView{
+    
+    // 初始化flowLayout
+    
+    _flowLayout = [[UICollectionViewFlowLayout alloc] init];
+    
+    // 设置单元格的左右最小间距
+    
+    _flowLayout.minimumInteritemSpacing = 0;
+    
+    // 设置单元格的上下最小间距
+    
+    _flowLayout.minimumLineSpacing = 0;
+    
+    // 设置滑动方向
+    
+    _flowLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+    
+    // 设置边界
+    
+    _flowLayout.sectionInset = UIEdgeInsetsMake(0, 0, 0, 0);
+    
+    // 初始化集合视图
+    
+    _collectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height) collectionViewLayout:self.flowLayout];
+    
+    _collectionView.hidden = YES;
+    
+    _collectionView.pagingEnabled = YES;
+    
+    _collectionView.backgroundColor = [UIColor clearColor];
+    
+    _collectionView.delegate = self;
+    
+    _collectionView.dataSource = self;
+    
+    [_collectionView registerClass:[PhotoBrowserCell class] forCellWithReuseIdentifier:@"CELL"];
+    
+    [self.view addSubview:_collectionView];
+    
+    // 初始化顶部视图
+    
+    _topView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 20.0f)];
+    
+    [self.view addSubview:_topView];
+    
+    // 初始化底部视图
+    
+    _bottomView = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 80, self.view.frame.size.width, 80)];
+    
+    [_bottomView.layer addSublayer:[self shadowAsInverseWithSize:CGSizeMake(self.view.frame.size.width, 80)]];
+    
+    [self.view addSubview:_bottomView];
+    
+    // 初始化页码Label
+    
+    _pageLable = [[UILabel alloc] initWithFrame:CGRectMake(0, 30, self.view.frame.size.width, 20)];
+    
+    _pageLable.textColor = [UIColor whiteColor];
+    
+    _pageLable.font = [UIFont systemFontOfSize:16.0f];
+    
+    _pageLable.textAlignment = NSTextAlignmentCenter;
+    
+    [self.bottomView addSubview:_pageLable];
+    
+    //初始化保存按钮
+    
+    _saveButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    
+    _saveButton.hidden = YES;
+    
+    _saveButton.frame = CGRectMake(self.view.frame.size.width - 60.0f, 20.0f, 40.0f, 40.0f);
+    
+    [_saveButton setTitle:@"保存" forState:UIControlStateNormal];
+    
+    [_saveButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    
+    [_saveButton addTarget:self action:@selector(saveImageAction) forControlEvents:UIControlEventTouchUpInside];
+    
+    [self.bottomView addSubview:_saveButton];
+}
+
+#pragma mark - 设置自动布局
+
+- (void)configAutoLayout{
+    
+}
+
+#pragma mark - 设置主题
+
+- (void)configTheme{
+    
+}
+
 #pragma mark - 显示
 
 - (void)show{
     
-    //非空验证
+    // 非空验证
     
-    if (!self.imageUrlArray) return;
+    if (!self.browser.imageUrlArray) return;
     
-    if (self.index >= self.imageUrlArray.count) return;
+    if (self.browser.index >= self.browser.imageUrlArray.count) return;
     
     //设置当前下标与页数
     
-    self.currentIndex = self.index;
+    self.currentIndex = self.browser.index;
     
-    self.pageLable.text = [NSString stringWithFormat:@"%ld/%ld",self.index + 1,(unsigned long)self.imageUrlArray.count];
+    self.pageLable.text = [NSString stringWithFormat:@"%ld/%ld",self.browser.index + 1,(unsigned long)self.browser.imageUrlArray.count];
     
     //添加到window上 并根据图片视图属性显示动画
     
     UIWindow *window = [[[UIApplication sharedApplication] delegate] window];
     
-    [window addSubview:self];
-    
-    if (self.imageView) {
+    if (self.browser.imageView) {
         
-        CGRect currentRect = [self.imageView convertRect: self.imageView.bounds toView:window];
+        CGRect currentRect = [self.browser.imageView convertRect: self.browser.imageView.bounds toView:window];
         
-        UIGraphicsBeginImageContext(self.imageView.frame.size);
+        UIGraphicsBeginImageContext(self.browser.imageView.frame.size);
         
-        [self.imageView.layer renderInContext:UIGraphicsGetCurrentContext()];
+        [self.browser.imageView.layer renderInContext:UIGraphicsGetCurrentContext()];
         
         UIImage *image =UIGraphicsGetImageFromCurrentImageContext();
         
@@ -257,23 +314,23 @@
         
         self.tempImageView.frame = currentRect;
         
-        [self addSubview:self.tempImageView];
+        [self.view addSubview:self.tempImageView];
         
         [UIView animateWithDuration:0.2f animations:^{
             
             CGRect tempImageViewFrame = self.tempImageView.frame;
             
-            tempImageViewFrame.size.width = self.frame.size.width;
+            tempImageViewFrame.size.width = self.view.frame.size.width;
             
-            tempImageViewFrame.size.height = self.frame.size.width * (currentRect.size.height / currentRect.size.width);
+            tempImageViewFrame.size.height = self.view.frame.size.width * (currentRect.size.height / currentRect.size.width);
             
             tempImageViewFrame.origin.x = 0;
             
-            tempImageViewFrame.origin.y = (self.frame.size.height - tempImageViewFrame.size.height) * 0.5f;
+            tempImageViewFrame.origin.y = (self.view.frame.size.height - tempImageViewFrame.size.height) * 0.5f;
             
             self.tempImageView.frame = tempImageViewFrame;
             
-            self.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.9f];
+            self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.9f];
             
         } completion:^(BOOL finished) {
             
@@ -288,13 +345,13 @@
         
     } else {
         
-        self.alpha = 0.0f;
+        self.view.alpha = 0.0f;
         
         [UIView animateWithDuration:0.2f animations:^{
             
-            self.alpha = 1.0f;
+            self.view.alpha = 1.0f;
             
-            self.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.9f];
+            self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.9f];
         }];
         
         self.collectionView.hidden = NO;
@@ -310,11 +367,11 @@
 
 - (void)hide{
     
-    if (self.imageView && self.currentIndex == self.index) {
+    UIWindow *window = [[[UIApplication sharedApplication] delegate] window];
+    
+    if (self.browser.imageView && self.currentIndex == self.browser.index) {
         
-        UIWindow *window = [[[UIApplication sharedApplication] delegate] window];
-        
-        CGRect currentRect = [self.imageView convertRect: self.imageView.bounds toView:window];
+        CGRect currentRect = [self.browser.imageView convertRect: self.browser.imageView.bounds toView:window];
         
         self.tempImageView.hidden = NO;
         
@@ -324,26 +381,34 @@
             
             self.tempImageView.frame = currentRect;
             
-            self.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.0f];
+            self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.0f];
             
         } completion:^(BOOL finished) {
             
             [self.tempImageView removeFromSuperview];
             
-            [self removeFromSuperview];
+            browserWindow.rootViewController = nil;
+            
+            browserWindow.hidden = YES;
+            
+            [browserWindow resignKeyWindow];
         }];
         
     } else {
         
         [UIView animateWithDuration:0.2f animations:^{
             
-            self.alpha = 0.0f;
+            self.view.alpha = 0.0f;
             
-            self.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.0f];
+            self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.0f];
             
         } completion:^(BOOL finished) {
             
-            [self removeFromSuperview];
+            browserWindow.rootViewController = nil;
+            
+            browserWindow.hidden = YES;
+            
+            [browserWindow resignKeyWindow];
         }];
         
     }
@@ -354,32 +419,39 @@
 
 - (void)saveImageAction{
     
-    //获取当前图片的URL
+    [self saveImageWithIndex:self.currentIndex];
+}
+
+#pragma mark - 保存图片
+
+- (void)saveImageWithIndex:(NSInteger)index{
     
-    NSURL *url = [self.imageUrlArray objectAtIndex:self.currentIndex];
+    // 获取当前图片的URL
+    
+    NSURL *url = [self.browser.imageUrlArray objectAtIndex:index];
     
     YYWebImageManager *manager = [YYWebImageManager sharedManager];
     
     if ([manager.cache containsImageForKey:[manager cacheKeyForURL:url]]) {
         
-        //获取图片
+        // 获取图片
         
         UIImage *image = [manager.cache getImageForKey:[manager cacheKeyForURL:url]];
         
         if (image) {
             
-            //存储图片到本地相册
+            // 存储图片到本地相册
             
             UIImageWriteToSavedPhotosAlbum(image, self, @selector(image:didFinishSavingWithError:contextInfo:), NULL);
             
         } else {
             
-            [self showMessage:@"保存图片失败"];
+            [self.view showMessage:@"保存图片失败"];
         }
         
     } else {
         
-        [self showMessage:@"保存图片失败"];
+        [self.view showMessage:@"保存图片失败"];
     }
     
 }
@@ -399,7 +471,7 @@
         msg = @"已成功存入相册";
     }
     
-    [self showMessage:msg];
+    [self.view showMessage:msg];
 }
 
 #pragma mark - 阴影处理
@@ -431,7 +503,7 @@
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
     
-    return self.imageUrlArray.count;
+    return self.browser.imageUrlArray.count;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
@@ -440,20 +512,27 @@
     
     __weak typeof(self) weakSelf = self;
     
+    cell.longClickBlock = ^{
+      
+        if (!weakSelf) return ;
+        
+        if (weakSelf.browser.longClickBlock) weakSelf.browser.longClickBlock(weakSelf.browser , weakSelf.currentIndex);
+    };
+    
     cell.loadFinishBlock = ^(NSURL *url , UIImage *image){
         
         if (weakSelf) {
             
-            //判断是否为当前显示的图片 如果是则显示保存按钮
+            // 判断是否为当前显示的图片 如果是则显示保存按钮
             
-            if (weakSelf.currentIndex == [weakSelf.imageUrlArray indexOfObject:url]) {
+            if (weakSelf.currentIndex == [weakSelf.browser.imageUrlArray indexOfObject:url]) {
                 
                 weakSelf.saveButton.hidden = NO;
             }
             
             // 回调加载完成的下标
             
-            if (weakSelf.loadFinishBlock) weakSelf.loadFinishBlock([weakSelf.imageUrlArray indexOfObject:url]);
+            if (weakSelf.browser.loadFinishBlock) weakSelf.browser.loadFinishBlock(weakSelf.browser , [weakSelf.browser.imageUrlArray indexOfObject:url]);
         }
         
     };
@@ -467,7 +546,7 @@
         
     };
     
-    cell.url = self.imageUrlArray[indexPath.item];
+    cell.url = self.browser.imageUrlArray[indexPath.item];
     
     return cell;
 }
@@ -481,17 +560,17 @@
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
     
-    //设置当前页数与下标
+    // 设置当前页数与下标
     
     NSInteger page = scrollView.contentOffset.x / scrollView.frame.size.width;
     
-    self.pageLable.text = [NSString stringWithFormat:@"%ld/%ld",page + 1,(unsigned long)self.imageUrlArray.count];
+    self.pageLable.text = [NSString stringWithFormat:@"%ld/%ld",page + 1,(unsigned long)self.browser.imageUrlArray.count];
     
     self.currentIndex = page;
     
-    //获取当前图片的URL 并查询缓存 显示隐藏保存按钮
+    // 获取当前图片的URL 并查询缓存 显示隐藏保存按钮
     
-    id url = [self.imageUrlArray objectAtIndex:self.currentIndex];
+    id url = [self.browser.imageUrlArray objectAtIndex:self.currentIndex];
     
     YYWebImageManager *manager = [YYWebImageManager sharedManager];
     
@@ -548,17 +627,19 @@
     self = [super initWithFrame:frame];
     if (self) {
         
+        self.clipsToBounds = YES;
+        
         // 初始化滑动视图
         
-        _scrollView = [[UIScrollView alloc]initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame))];
+        _scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame))];
         
         _scrollView.contentSize = CGSizeMake(CGRectGetWidth(self.frame), CGRectGetHeight(self.frame));
         
-        _scrollView.maximumZoomScale = 3;
+        _scrollView.maximumZoomScale = 5.0f;
         
-        _scrollView.minimumZoomScale = 1;
+        _scrollView.minimumZoomScale = 0.3f;
         
-        _scrollView.zoomScale = 1;
+        _scrollView.zoomScale = 1.0f;
         
         _scrollView.delegate = self;
         
@@ -574,7 +655,7 @@
         
         tap.delegate = self;
         
-        [self.scrollView addGestureRecognizer:tap];
+        [self.contentView addGestureRecognizer:tap];
         
         // 初始化图片视图
         
@@ -594,7 +675,23 @@
         
         imageDoubleTap.numberOfTouchesRequired = 1;
         
+        imageDoubleTap.delegate = self;
+        
         [self.imageView addGestureRecognizer:imageDoubleTap];
+        
+        UILongPressGestureRecognizer *imageLong = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(imageLongAction:)];
+        
+        imageLong.allowableMovement = 20.0f;
+        
+        imageLong.minimumPressDuration = 0.8f;
+        
+        imageLong.numberOfTouchesRequired = 1;
+        
+        imageLong.delegate = self;
+        
+        [self.imageView addGestureRecognizer:imageLong];
+        
+        [tap requireGestureRecognizerToFail:imageLong];
         
         // 当没有检测到图片双击手势时 或者 检测图片双击手势失败，单击手势才有效
         
@@ -626,6 +723,21 @@
     return self;
 }
 
+- (void)layoutSubviews{
+    
+    [super layoutSubviews];
+    
+    _scrollView.frame = CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame));
+    
+    _scrollView.zoomScale = 1;
+    
+    _promptLable.frame = CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetWidth(self.frame) * 0.5f);
+    
+    _promptLable.center = CGPointMake(CGRectGetWidth(self.frame) * 0.5f, CGRectGetHeight(self.frame) * 0.5f);
+    
+    [self configImageViewLayout];
+}
+
 #pragma mark - 获取图片Url
 
 - (void)setUrl:(NSURL *)url{
@@ -639,19 +751,19 @@
 
 - (void)loadImage{
     
-    //缩放比例
+    // 缩放比例
     
     self.scrollView.zoomScale = 1;
     
-    //进度条归0
+    // 进度条归0
     
     [self.roundProgressView setProgress:0.0f];
     
-    //显示提示框
+    // 显示提示框
     
     [self.HUD show:YES];
     
-    //隐藏提示Label
+    // 隐藏提示Label
     
     self.promptLable.hidden = YES;
     
@@ -659,14 +771,15 @@
     
     [self.imageView setImageWithURL:self.url placeholder:nil options:YYWebImageOptionSetImageWithFadeAnimation progress:^(NSInteger receivedSize, NSInteger expectedSize) {
         
-        if (weakSelf) {
-            
-            //计算加载进度百分比 并设置进度条
-            
-            float progressFloat = (float)receivedSize/(float)expectedSize;
-            
-            [weakSelf.roundProgressView setProgress:progressFloat];
-        }
+        if (!weakSelf) return ;
+        
+        // 计算加载进度百分比 并设置进度条
+        
+        float progressFloat = (float)receivedSize/(float)expectedSize;
+        
+        [weakSelf.HUD show:NO];
+        
+        [weakSelf.roundProgressView setProgress:progressFloat];
         
     } transform:^UIImage * _Nullable(UIImage * _Nonnull image, NSURL * _Nonnull url) {
         
@@ -676,47 +789,84 @@
         
         __strong typeof(weakSelf) strongSelf = weakSelf;
         
-        if (strongSelf){
+        if (!strongSelf) return ;
+        
+        // 隐藏提示框
+        
+        [strongSelf.HUD hide:NO];
+        
+        if (error) {
             
-            //隐藏提示框
+            strongSelf.promptLable.hidden = NO;
             
-            [strongSelf.HUD hide:NO];
+        } else {
             
-            if (error) {
-                
-                strongSelf.promptLable.hidden = NO;
-                
-            } else {
-                
-                //获取图片宽高 并设置大小
-                
-                CGFloat width =  image.size.width;
-                
-                CGFloat height = image.size.height;
-                
-                CGFloat ratio = height ? (width / height) : 0;
-                
-                strongSelf.imageView.frame = CGRectMake(0, 0, strongSelf.scrollView.frame.size.width, ratio ? strongSelf.scrollView.frame.size.width / ratio : 0);
-                
-                strongSelf.scrollView.contentSize = CGSizeMake(CGRectGetWidth(strongSelf.imageView.frame), CGRectGetHeight(strongSelf.imageView.frame));
-                
-                if (strongSelf.imageView.frame.size.height > strongSelf.scrollView.frame.size.height){
-                    
-                    strongSelf.imageView.center = CGPointMake(strongSelf.scrollView.contentSize.width / 2, strongSelf.scrollView.contentSize.height / 2);
-                    
-                } else {
-                    
-                    strongSelf.imageView.center = CGPointMake(CGRectGetWidth(strongSelf.scrollView.frame) / 2 , CGRectGetHeight(strongSelf.scrollView.frame) / 2);
-                }
-                
-                //调用加载完成回调Block
-                
-                if (strongSelf.loadFinishBlock) strongSelf.loadFinishBlock(url , image);
-            }
+            // 设置图片视图布局
             
+            [strongSelf configImageViewLayout];
+            
+            // 调用加载完成回调Block
+            
+            if (strongSelf.loadFinishBlock) strongSelf.loadFinishBlock(url , image);
         }
         
     }];
+    
+}
+
+#pragma mark - 设置图片视图布局
+
+- (void)configImageViewLayout{
+    
+    // 获取图片宽高 并设置大小
+    
+    UIImage *image = self.imageView.image;
+    
+    CGFloat width =  image.size.width;
+    
+    CGFloat height = image.size.height;
+    
+    CGFloat ratio = height ? (width / height) : 0;
+    
+    CGFloat scrollViewWidth = self.scrollView.frame.size.width;
+    
+    CGFloat scrollViewHeight = self.scrollView.frame.size.height;
+    
+    if (scrollViewWidth > scrollViewHeight) {
+        
+        // 横屏
+        
+        self.imageView.frame = CGRectMake(0, 0, ratio ? scrollViewHeight * ratio : 0, scrollViewHeight);
+        
+        self.scrollView.contentSize = CGSizeMake(CGRectGetWidth(self.imageView.frame), CGRectGetHeight(self.imageView.frame));
+        
+        if (self.imageView.frame.size.width > scrollViewWidth) {
+            
+            self.imageView.center = CGPointMake(CGRectGetWidth(self.imageView.frame) * 0.5f, scrollViewHeight * 0.5f);
+            
+        } else {
+            
+            self.imageView.center = CGPointMake(scrollViewWidth * 0.5f , scrollViewHeight * 0.5f);
+        }
+        
+    } else {
+        
+        // 竖屏
+        
+        self.imageView.frame = CGRectMake(0, 0, scrollViewWidth, ratio ? scrollViewWidth / ratio : 0);
+        
+        self.scrollView.contentSize = CGSizeMake(CGRectGetWidth(self.imageView.frame), CGRectGetHeight(self.imageView.frame));
+        
+        if (self.imageView.frame.size.height > scrollViewHeight) {
+            
+            self.imageView.center = CGPointMake(scrollViewWidth * 0.5f, CGRectGetHeight(self.imageView.frame) * 0.5f);
+            
+        } else {
+            
+            self.imageView.center = CGPointMake(scrollViewWidth * 0.5f , scrollViewHeight * 0.5f);
+        }
+    
+    }
     
 }
 
@@ -731,20 +881,30 @@
 
 - (void)imageTapAction:(UITapGestureRecognizer *)tap{
     
-    [UIView beginAnimations:@"" context:nil];
-    
-    [UIView setAnimationDuration:0.15f];
-    
     if (self.scrollView.zoomScale == 1.0f) {
         
-        self.scrollView.zoomScale = 1.5f; //1.5倍放大
+        [self.scrollView setZoomScale:1.5f animated:YES]; //1.5倍放大
         
     } else {
         
-        self.scrollView.zoomScale = 1.0f; //还原缩放比例
+        [self.scrollView setZoomScale:1.0f animated:YES]; //还原缩放比例
     }
     
-    [UIView commitAnimations];
+}
+
+#pragma mark - 图片长按事件
+
+- (void)imageLongAction:(UILongPressGestureRecognizer *)longPress{
+    
+    if (longPress.state == UIGestureRecognizerStateBegan){
+        
+        if (self.imageView.image) {
+            
+            if (self.longClickBlock) self.longClickBlock(self.imageView.image);
+        }
+    
+    }
+    
 }
 
 #pragma mark - UIScrollViewDelegate
@@ -756,21 +916,21 @@
 
 - (void)scrollViewDidZoom:(UIScrollView *)scrollView{
     
-    //当scrollView正在缩放的时候会频繁响应的方法
+    // 当scrollView正在缩放的时候会频繁响应的方法
     
-    //x和y轴的增量:
+    // x和y轴的增量:
     
-    //当scrollView自身的宽度或者高度大于其contentSize的时候, 增量为:自身宽度或者高度减去contentSize宽度或者高度除以2,或者为0
+    // 当scrollView自身的宽度或者高度大于其contentSize的时候, 增量为:自身宽度或者高度减去contentSize宽度或者高度除以2,或者为0
     
-    //条件运算符
+    // 条件运算符
     
     CGFloat delta_x = scrollView.bounds.size.width > scrollView.contentSize.width ? (scrollView.bounds.size.width-scrollView.contentSize.width)/2 : 0;
     
     CGFloat delta_y = scrollView.bounds.size.height > scrollView.contentSize.height ? (scrollView.bounds.size.height - scrollView.contentSize.height)/2 : 0;
     
-    //让imageView一直居中
+    // 让imageView一直居中
     
-    //实时修改imageView的center属性 保持其居中
+    // 实时修改imageView的center属性 保持其居中
     
     self.imageView.center = CGPointMake(scrollView.contentSize.width/2 + delta_x, scrollView.contentSize.height/2 + delta_y);
 }
@@ -786,7 +946,7 @@
 
 - (void)hudWasHidden:(MBProgressHUD *)hud{
     
-    //提示框隐藏时 删除提示框视图
+    // 提示框隐藏时 删除提示框视图
     
     [hud removeFromSuperview];
     
@@ -805,7 +965,7 @@
         
         [self addSubview:_HUD];
         
-        _HUD.mode = MBProgressHUDModeCustomView;//设置自定义视图模式
+        _HUD.mode = MBProgressHUDModeCustomView; //设置自定义视图模式
         
         _HUD.delegate = self;
         
@@ -821,7 +981,7 @@
     
     if (!_roundProgressView) {
         
-        _roundProgressView = [[MBRoundProgressView alloc]initWithFrame:CGRectMake(0, 0, 64 , 64 )];
+        _roundProgressView = [[MBRoundProgressView alloc]initWithFrame:CGRectMake(0, 0, 64 , 64)];
     }
     
     return _roundProgressView;

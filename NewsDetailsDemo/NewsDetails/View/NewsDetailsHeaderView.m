@@ -273,13 +273,6 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
     
 }
 
-- (void)layoutSubviews{
-    
-    [super layoutSubviews];
-    
-    NSLog(@"%@" , [NSValue valueWithCGRect:self.frame]);
-}
-
 #pragma mark - 设置主题
 
 - (void)configTheme{
@@ -1118,18 +1111,30 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
         browser.index = [message.body integerValue];
         
         [browser show];
-    
+        
         __weak typeof(self) weakSelf = self;
         
-        browser.loadFinishBlock = ^(NSInteger index) {
+        browser.loadFinishBlock = ^(PhotoBrowser *weakBrowser, NSInteger index) {
         
             if (!weakSelf) return ;
             
             // 更新webview中的图片
             
-            [weakSelf loadImage:index ResultBlock:^{
+            [weakSelf loadImage:index ResultBlock:^{}];
+        };
+        
+        browser.longClickBlock = ^(PhotoBrowser *weakBrowser, NSInteger index) {
+          
+            if (!weakSelf) return ;
+            
+            [LEEAlert actionsheet].config
+            .LeeAction(@"保存", ^{
                 
-            }];
+                [weakBrowser saveImageWithIndex:index];
+            })
+            .LeeCancelAction(@"取消", nil)
+            .LeeBackgroundStyleBlur(UIBlurEffectStyleDark)
+            .LeeShow();
             
         };
         

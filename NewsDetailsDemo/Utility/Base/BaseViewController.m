@@ -125,7 +125,15 @@
             
             self.navigationBar.lee_theme
             .LeeAddBackgroundColor(THEME_DAY, HEX_FFFFFF)
-            .LeeAddBackgroundColor(THEME_NIGHT, HEX_303030);
+            .LeeAddBackgroundColor(THEME_NIGHT, HEX_303030)
+            .LeeAddCustomConfig(THEME_DAY, ^(id item) {
+                
+                [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
+            })
+            .LeeAddCustomConfig(THEME_NIGHT, ^(id item) {
+                
+                [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:YES];
+            });
             
             isLine = YES;
             
