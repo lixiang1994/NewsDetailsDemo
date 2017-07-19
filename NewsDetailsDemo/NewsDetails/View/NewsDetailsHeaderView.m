@@ -527,7 +527,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
                            <meta name = \"viewport\" content=\"width = device-width, initial-scale = 1, user-scalable=no\"/>\
                            <title></title>\
                            <link href=\"../css/WebContentStyle.css\" rel=\"stylesheet\" type=\"text/css\"/>\
-                           <script src=\"../js/jquery-1.12.3.min.js\"></script>\
+                           <script src=\"../js/jquery.min.js\"></script>\
                            <script src=\"../js/radialIndicator.js\"></script>\
                            </head>\
                            <body style=\"font-size:%@px;\">\
@@ -745,7 +745,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
         
         if (!weakSelf) return ;
         
-        [weakSelf.webView evaluateJavaScript:[NSString stringWithFormat:@"configLoadingProgress('%ld' , '%.2f')" , index, progress] completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
+        [weakSelf.webView evaluateJavaScript:[NSString stringWithFormat:@"configLoadingProgress('%ld' , '%.2f');" , index, progress] completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
         
     } ResultBlock:^(NSString *cachePath, BOOL result) {
         
@@ -796,7 +796,6 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
         // 更新webview高度
         
         [weakSelf updateHeight];
-        
     }];
     
 }
@@ -865,6 +864,62 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
         
     });
     
+}
+
+- (void)openPhotoBrowserWithUrlArray:(NSArray *)urlArray Index:(NSInteger)index{
+    
+    PhotoBrowser *browser = [PhotoBrowser browser];
+    
+    browser.imageUrlArray = urlArray;
+    
+    browser.index = index;
+    
+    [browser show];
+    
+    __weak typeof(self) weakSelf = self;
+    
+    browser.loadFinishBlock = ^(PhotoBrowser *weakBrowser, NSInteger index) {
+        
+        if (!weakSelf) return ;
+        
+        // 更新webview中的图片
+        
+        [weakSelf loadImage:index ResultBlock:^{}];
+    };
+    
+    browser.longClickBlock = ^(PhotoBrowser *weakBrowser, NSInteger index) {
+        
+        if (!weakSelf) return ;
+        
+        // 打开actionsheet
+        
+        [LEEAlert actionsheet].config
+        .LeeDestructiveAction(@"保存", ^{
+            
+            [weakBrowser saveImageWithIndex:index];
+        })
+        .LeeAddAction(^(LEEAction *action) {
+            
+            action.type = LEEActionTypeCancel;
+            
+            action.title = @"取消";
+            
+            action.titleColor = [UIColor blackColor];
+            
+            action.font = [UIFont systemFontOfSize:18.0f];
+        })
+        .LeeActionSheetCancelActionSpaceColor([UIColor colorWithWhite:0.92 alpha:1.0f]) // 设置取消按钮间隔的颜色
+        .LeeActionSheetBottomMargin(0.0f) // 设置底部距离屏幕的边距为0
+        .LeeCornerRadius(0.0f) // 设置圆角曲率为0
+        .LeeConfigMaxWidth(^CGFloat(LEEScreenOrientationType type) {
+            
+            // 这是最大宽度为屏幕宽度 (横屏和竖屏)
+            
+            return CGRectGetWidth([[UIScreen mainScreen] bounds]);
+        })
+        .LeeBackgroundStyleBlur(UIBlurEffectStyleDark)
+        .LeeShow();
+    };
 }
 
 #pragma mark - WKUIDelegate
@@ -1104,40 +1159,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
             [urlArray addObject:info[@"original"]];
         }
         
-        PhotoBrowser *browser = [PhotoBrowser browser];
-        
-        browser.imageUrlArray = [urlArray copy];
-        
-        browser.index = [message.body integerValue];
-        
-        [browser show];
-        
-        __weak typeof(self) weakSelf = self;
-        
-        browser.loadFinishBlock = ^(PhotoBrowser *weakBrowser, NSInteger index) {
-        
-            if (!weakSelf) return ;
-            
-            // 更新webview中的图片
-            
-            [weakSelf loadImage:index ResultBlock:^{}];
-        };
-        
-        browser.longClickBlock = ^(PhotoBrowser *weakBrowser, NSInteger index) {
-          
-            if (!weakSelf) return ;
-            
-            [LEEAlert actionsheet].config
-            .LeeAction(@"保存", ^{
-                
-                [weakBrowser saveImageWithIndex:index];
-            })
-            .LeeCancelAction(@"取消", nil)
-            .LeeBackgroundStyleBlur(UIBlurEffectStyleDark)
-            .LeeShow();
-            
-        };
-        
+        [self openPhotoBrowserWithUrlArray:[urlArray copy] Index:[message.body integerValue]];
     }
     
 }

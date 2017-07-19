@@ -135,7 +135,7 @@
 		9BAA872B1F14BD2E0064CAEB /* SelectedListView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BAA87211F14BD2E0064CAEB /* SelectedListView.m */; };
 		9BAA872C1F14BD2E0064CAEB /* AllShareView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BAA87241F14BD2E0064CAEB /* AllShareView.m */; };
 		9BAA872D1F14BD2E0064CAEB /* ShareButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BAA87261F14BD2E0064CAEB /* ShareButton.m */; };
-		9BAA873C1F14BFDE0064CAEB /* jquery-1.12.3.min.js in Resources */ = {isa = PBXBuildFile; fileRef = 9BAA87331F14BFDE0064CAEB /* jquery-1.12.3.min.js */; };
+		9BAA873C1F14BFDE0064CAEB /* jquery.min.js in Resources */ = {isa = PBXBuildFile; fileRef = 9BAA87331F14BFDE0064CAEB /* jquery.min.js */; };
 		9BAA873E1F14BFDE0064CAEB /* load_image_gif_icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 9BAA87351F14BFDE0064CAEB /* load_image_gif_icon.png */; };
 		9BAA87421F14BFDE0064CAEB /* radialIndicator.js in Resources */ = {isa = PBXBuildFile; fileRef = 9BAA87391F14BFDE0064CAEB /* radialIndicator.js */; };
 		9BAA87431F14BFDE0064CAEB /* WebContentHandle.js in Resources */ = {isa = PBXBuildFile; fileRef = 9BAA873A1F14BFDE0064CAEB /* WebContentHandle.js */; };
@@ -411,7 +411,7 @@
 		9BAA87241F14BD2E0064CAEB /* AllShareView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AllShareView.m; sourceTree = "<group>"; };
 		9BAA87251F14BD2E0064CAEB /* ShareButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShareButton.h; sourceTree = "<group>"; };
 		9BAA87261F14BD2E0064CAEB /* ShareButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ShareButton.m; sourceTree = "<group>"; };
-		9BAA87331F14BFDE0064CAEB /* jquery-1.12.3.min.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = "jquery-1.12.3.min.js"; sourceTree = "<group>"; };
+		9BAA87331F14BFDE0064CAEB /* jquery.min.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = jquery.min.js; sourceTree = "<group>"; };
 		9BAA87351F14BFDE0064CAEB /* load_image_gif_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = load_image_gif_icon.png; sourceTree = "<group>"; };
 		9BAA87391F14BFDE0064CAEB /* radialIndicator.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = radialIndicator.js; sourceTree = "<group>"; };
 		9BAA873A1F14BFDE0064CAEB /* WebContentHandle.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = WebContentHandle.js; sourceTree = "<group>"; };
@@ -1120,7 +1120,7 @@
 		9BAA87321F14BFDE0064CAEB /* File */ = {
 			isa = PBXGroup;
 			children = (
-				9BAA87331F14BFDE0064CAEB /* jquery-1.12.3.min.js */,
+				9BAA87331F14BFDE0064CAEB /* jquery.min.js */,
 				9BAA87351F14BFDE0064CAEB /* load_image_gif_icon.png */,
 				9B7BABF11F1CC44500F9889B /* load_image.png */,
 				9BAA87391F14BFDE0064CAEB /* radialIndicator.js */,
@@ -1225,7 +1225,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9BAA873C1F14BFDE0064CAEB /* jquery-1.12.3.min.js in Resources */,
+				9BAA873C1F14BFDE0064CAEB /* jquery.min.js in Resources */,
 				9BAA857E1F14B5B30064CAEB /* LaunchScreen.storyboard in Resources */,
 				9BAA87431F14BFDE0064CAEB /* WebContentHandle.js in Resources */,
 				9BAA857B1F14B5B30064CAEB /* Assets.xcassets in Resources */,

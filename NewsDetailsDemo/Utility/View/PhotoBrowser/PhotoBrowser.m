@@ -593,7 +593,7 @@ static UIWindow *browserWindow;
 
 @property (nonatomic , strong ) YYAnimatedImageView *imageView; //图片视图
 
-@property (nonatomic , strong ) UILabel *promptLable; //提示Label
+@property (nonatomic , strong ) UIButton *promptButton; //提示
 
 @property (nonatomic , strong ) MBProgressHUD *HUD; //HUD提示框
 
@@ -615,7 +615,7 @@ static UIWindow *browserWindow;
     
     _imageView = nil;
     
-    _promptLable = nil;
+    _promptButton = nil;
     
     _HUD = nil;
     
@@ -699,25 +699,23 @@ static UIWindow *browserWindow;
         
         // 初始化提示Label
         
-        _promptLable = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetWidth(self.frame) * 0.5f)];
+        _promptButton = [UIButton buttonWithType:UIButtonTypeCustom];
         
-        _promptLable.center = CGPointMake(CGRectGetWidth(self.frame) * 0.5f, CGRectGetHeight(self.frame) * 0.5f);
+        _promptButton.frame = CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetWidth(self.frame) * 0.5f);
         
-        _promptLable.hidden = YES;
+        _promptButton.center = CGPointMake(CGRectGetWidth(self.frame) * 0.5f, CGRectGetHeight(self.frame) * 0.5f);
         
-        _promptLable.text = @"加载失败 点击重试";
+        _promptButton.hidden = YES;
         
-        _promptLable.textColor = [UIColor lightGrayColor];
+        [_promptButton setTitle:@"加载失败 点击重试" forState:UIControlStateNormal];
         
-        _promptLable.textAlignment = NSTextAlignmentCenter;
+        [_promptButton setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
         
-        _promptLable.backgroundColor = [UIColor darkGrayColor];
+        _promptButton.backgroundColor = [UIColor darkGrayColor];
         
-        _promptLable.userInteractionEnabled = YES;
+        [_promptButton addTarget:self action:@selector(loadImage) forControlEvents:UIControlEventTouchUpInside];
         
-        [_promptLable addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(loadImage)]];
-        
-        [self.contentView addSubview:_promptLable];
+        [self.contentView addSubview:_promptButton];
         
     }
     return self;
@@ -731,9 +729,9 @@ static UIWindow *browserWindow;
     
     _scrollView.zoomScale = 1;
     
-    _promptLable.frame = CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetWidth(self.frame) * 0.5f);
+    _promptButton.frame = CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetWidth(self.frame) * 0.5f);
     
-    _promptLable.center = CGPointMake(CGRectGetWidth(self.frame) * 0.5f, CGRectGetHeight(self.frame) * 0.5f);
+    _promptButton.center = CGPointMake(CGRectGetWidth(self.frame) * 0.5f, CGRectGetHeight(self.frame) * 0.5f);
     
     [self configImageViewLayout];
 }
@@ -765,7 +763,7 @@ static UIWindow *browserWindow;
     
     // 隐藏提示Label
     
-    self.promptLable.hidden = YES;
+    self.promptButton.hidden = YES;
     
     __weak typeof(self) weakSelf = self;
     
@@ -795,19 +793,30 @@ static UIWindow *browserWindow;
         
         [strongSelf.HUD hide:NO];
         
-        if (error) {
-            
-            strongSelf.promptLable.hidden = NO;
-            
-        } else {
-            
-            // 设置图片视图布局
-            
-            [strongSelf configImageViewLayout];
-            
-            // 调用加载完成回调Block
-            
-            if (strongSelf.loadFinishBlock) strongSelf.loadFinishBlock(url , image);
+        switch (stage) {
+            case YYWebImageStageFinished:
+            {
+                if (!error && image) {
+                    
+                    strongSelf.promptButton.hidden = YES;
+                    
+                    // 设置图片视图布局
+                    
+                    [strongSelf configImageViewLayout];
+                    
+                    // 调用加载完成回调Block
+                    
+                    if (strongSelf.loadFinishBlock) strongSelf.loadFinishBlock(url , image);
+                    
+                } else {
+                    
+                    strongSelf.promptButton.hidden = NO;
+                }
+            }
+                break;
+                
+            default:
+                break;
         }
         
     }];
@@ -942,32 +951,17 @@ static UIWindow *browserWindow;
     return YES;
 }
 
-#pragma mark - MBProgressHUDDelegate
-
-- (void)hudWasHidden:(MBProgressHUD *)hud{
-    
-    // 提示框隐藏时 删除提示框视图
-    
-    [hud removeFromSuperview];
-    
-    hud.customView = nil;
-    
-    hud = nil;
-}
-
 #pragma mark - LazyLoading
 
 - (MBProgressHUD *)HUD{
     
     if (!_HUD) {
         
-        _HUD = [[MBProgressHUD alloc] initWithView:self];
+        _HUD = [[MBProgressHUD alloc] initWithView:self.contentView];
         
-        [self addSubview:_HUD];
+        [self.contentView addSubview:_HUD];
         
         _HUD.mode = MBProgressHUDModeCustomView; //设置自定义视图模式
-        
-        _HUD.delegate = self;
         
         _HUD.color = [UIColor clearColor];
         

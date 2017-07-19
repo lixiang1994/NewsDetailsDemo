@@ -18,7 +18,7 @@
     
     // 获取临时缓存目录
     
-    NSString *jqueryJSPath = [[ContentManager getCachePath:@"js"] stringByAppendingPathComponent:@"jquery-1.12.3.min.js"];
+    NSString *jqueryJSPath = [[ContentManager getCachePath:@"js"] stringByAppendingPathComponent:@"jquery.min.js"];
     
     NSString *radialIndicatorJSPath = [[ContentManager getCachePath:@"js"] stringByAppendingPathComponent:@"radialIndicator.js"];
     
@@ -30,7 +30,7 @@
     
     if (![[NSFileManager defaultManager] fileExistsAtPath:jqueryJSPath]) {
         
-        NSString *jqueryJS = [NSString stringWithContentsOfFile:[mainBundle pathForResource:@"jquery-1.12.3.min" ofType:@"js"] encoding:NSUTF8StringEncoding error:NULL]; //jqueryJS
+        NSString *jqueryJS = [NSString stringWithContentsOfFile:[mainBundle pathForResource:@"jquery.min" ofType:@"js"] encoding:NSUTF8StringEncoding error:NULL]; //jqueryJS
         
         [jqueryJS writeToFile:jqueryJSPath atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     }
@@ -261,7 +261,11 @@
 
 + (BOOL)isLoadImage{
     
-    return NO;
+    // 一般用于控制非WIFI情况的图片加载
+    
+    
+    
+    return YES;
 }
 
 + (CGFloat)fontSize:(CGFloat)size{

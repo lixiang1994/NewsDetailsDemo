@@ -22,7 +22,7 @@
         
         model.newsTime = @"2小时前";
         
-        model.newsTitle = @"标题";
+        model.newsTitle = @"猫：喜欢猴子养一个呗，在这折腾我干嘛？";
         
         model.newsHtml = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"FakeData" ofType:@""] encoding:NSUTF8StringEncoding error:nil];
         
