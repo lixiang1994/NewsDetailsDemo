@@ -163,7 +163,7 @@ function configImgState(state, index, className){
         case 5:
             
             // 状态置为5
-            img.attr({"data-state":5 , "id":""});
+            img.attr({"data-state":5});
             
             // 隐藏提示
             span.text("");

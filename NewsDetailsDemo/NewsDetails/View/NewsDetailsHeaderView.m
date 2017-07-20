@@ -465,7 +465,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
                         
                         // 设置缓存图片路径
                         
-                        [imageString appendFormat:@" src=\"\""];
+                        [imageString appendFormat:@" src=\"../defaultimage/load_image.png\""];
                         
                         // 设置状态
                         
@@ -536,7 +536,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
                            <script src=\"../js/WebContentHandle.js\"></script>\
                            </html>" , styleType , fontSize , contentHTMLString];
         
-        NSString *htmlPath = [[ContentManager getCachePath:@"html"] stringByAppendingPathComponent:@"newsContent.html"];
+        NSString *htmlPath = [[ContentManager getCachePath:@"html"] stringByAppendingPathComponent:[NSString stringWithFormat:@"newsContent.html"]];
         
         [frame writeToFile:htmlPath atomically:YES encoding:NSUTF8StringEncoding error:NULL];
         
@@ -740,38 +740,65 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
     
     NSDictionary *info = self.imageInfoArray[index];
     
-    NSString *url = info[@"original"];
+    // 获取当前Url (src)
     
-    // 加载图片
+    NSString *current = info[@"current"];
     
-    [ContentManager loadImage:[NSURL URLWithString:url] ProgressBlock:^(CGFloat progress) {
+    // 获取原图Url
+    
+    NSString *original = info[@"original"];
+    
+    // 判断缓存是否存在
+    
+    NSString *originalPath = [ContentManager getCacheImageFilePathWithUrl:original];
+    
+    if (originalPath) {
         
-        if (!weakSelf) return ;
+        // 原图存在 当前不等于原图 重新设置
         
-        [weakSelf.webView evaluateJavaScript:[NSString stringWithFormat:@"configLoadingProgress('%ld' , '%.2f');" , index, progress] completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
-        
-    } ResultBlock:^(NSString *cachePath, BOOL result) {
-        
-        if (!weakSelf) return;
-        
-        // 判断结果 并设置相应的状态
-        
-        if (result) {
+        if (![current isEqualToString:[NSURL fileURLWithPath:originalPath].absoluteString]) {
             
-            // 设置图片Url和完成状态
-            
-            [weakSelf loadImageFinishHandleWithIndex:index State:ContentImageLoadStateFinish ImagePath:cachePath ResultBlock:resultBlock];
+            [weakSelf loadImageFinishHandleWithIndex:index State:ContentImageLoadStateFinish ImagePath:originalPath ResultBlock:resultBlock];
             
         } else {
             
-            // 设置加载失败状态 (gif图片失败 则重新设置为5)
-            
-            NSString *configJS = [NSString stringWithFormat:@"configImgState('5' , '%ld');" , index];
-            
-            [weakSelf.webView evaluateJavaScript:configJS completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
+            if (resultBlock) resultBlock();
         }
         
-    }];
+    } else {
+        
+        // 加载图片
+        
+        [ContentManager loadImage:[NSURL URLWithString:original] ProgressBlock:^(CGFloat progress) {
+            
+            if (!weakSelf) return ;
+            
+            [weakSelf.webView evaluateJavaScript:[NSString stringWithFormat:@"configLoadingProgress('%ld' , '%.2f');" , index, progress] completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
+            
+        } ResultBlock:^(NSString *cachePath, BOOL result) {
+            
+            if (!weakSelf) return;
+            
+            // 判断结果 并设置相应的状态
+            
+            if (result) {
+                
+                // 设置图片Url和完成状态
+                
+                [weakSelf loadImageFinishHandleWithIndex:index State:ContentImageLoadStateFinish ImagePath:cachePath ResultBlock:resultBlock];
+                
+            } else {
+                
+                // 设置加载失败状态 (gif图片失败 则重新设置为5)
+                
+                NSString *configJS = [NSString stringWithFormat:@"configImgState('5' , '%ld');" , index];
+                
+                [weakSelf.webView evaluateJavaScript:configJS completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
+            }
+            
+        }];
+        
+    }
     
 }
 

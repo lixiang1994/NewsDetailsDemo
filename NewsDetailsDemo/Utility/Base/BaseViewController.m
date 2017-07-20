@@ -302,7 +302,10 @@
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+    
+    // 清空图片内存缓存
+    
+    [[YYWebImageManager sharedManager].cache.memoryCache removeAllObjects];
 }
 
 #pragma mark - 设置竖屏

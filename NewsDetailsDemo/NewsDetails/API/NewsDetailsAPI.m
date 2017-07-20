@@ -46,7 +46,7 @@
             
             [NewsDetailsModel setCache:model forNewsId:model.newsId];
             
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 
                 if (resultBlock) resultBlock(model);
             });

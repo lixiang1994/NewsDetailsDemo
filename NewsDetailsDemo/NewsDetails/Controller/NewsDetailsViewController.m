@@ -74,6 +74,13 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
 
 @implementation NewsDetailsViewController
 
+- (void)dealloc{
+    
+    _dataArray = nil;
+    
+    _commentArray = nil;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
@@ -280,6 +287,53 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
 - (void)configRefresh{
     
     __weak typeof(self) weakSelf = self;
+    
+    MJRefreshStateHeader *header = [MJRefreshStateHeader headerWithRefreshingBlock:^{
+       
+        if (!weakSelf) return ;
+        
+        CATransition *transtion = [CATransition animation];
+        
+        transtion.duration = 0.3f;
+        
+        transtion.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+        
+        transtion.type = kCATransitionReveal;
+        
+        transtion.subtype = kCATransitionFromBottom;
+        
+        [weakSelf.navigationController.view.layer addAnimation:transtion forKey:nil];
+        
+        [weakSelf.navigationController popViewControllerAnimated:NO];
+        
+        /** 淡出
+        [UIView transitionWithView:self.navigationController.view duration:0.3f options:UIViewAnimationOptionTransitionCrossDissolve animations:^{
+            
+            [weakSelf.navigationController popViewControllerAnimated:NO];
+            
+        } completion:nil];
+         */
+    }];
+    
+    header.lastUpdatedTimeLabel.hidden = YES;
+    
+    [header setTitle:@"下拉关闭页面" forState:MJRefreshStateIdle];
+    
+    [header setTitle:@"释放关闭页面" forState:MJRefreshStateRefreshing];
+    
+    [header setTitle:@"释放关闭页面" forState:MJRefreshStatePulling];
+    
+    // 设置字体
+    
+    header.stateLabel.font = [UIFont systemFontOfSize:14.0f];
+    
+    // 设置颜色
+    
+    header.stateLabel.lee_theme
+    .LeeAddTextColor(THEME_DAY, HEX_999999)
+    .LeeAddTextColor(THEME_NIGHT, HEX_666666);
+    
+    self.tableView.mj_header = header;
     
     MJRefreshAutoNormalFooter *footer = [MJRefreshAutoNormalFooter footerWithRefreshingBlock:^{
         
@@ -905,7 +959,7 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
         
         NewsDetailsViewController *vc = [[NewsDetailsViewController alloc] init];
         
-        vc.newsId = @"1994";
+        vc.newsId = @"1995";
         
         vc.hidesBottomBarWhenPushed = YES;
         

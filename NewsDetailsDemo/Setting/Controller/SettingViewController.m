@@ -28,6 +28,11 @@
 
 @implementation SettingViewController
 
+- (void)dealloc{
+    
+    _dataArray = nil;
+}
+
 - (void)viewWillAppear:(BOOL)animated{
     
     [super viewWillAppear:animated];
