@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface NewsDetailsModel : NSObject<YYModel>
+@interface NewsDetailsModel : NSObject<YYModel , NSCoding>
 
 /**
  资讯Id
@@ -44,5 +44,29 @@
  不喜欢数
  */
 @property (nonatomic , assign ) NSInteger dislikeCount;
+
+#pragma mark - 扩展属性
+
+/**
+ 是否点赞
+ */
+@property (nonatomic , assign ) BOOL isPraise;
+
+/**
+ 是否不喜欢
+ */
+@property (nonatomic , assign ) BOOL isDislike;
+
+#pragma mark - 缓存
+
++ (NewsDetailsModel *)cacheForNewsId:(NSString *)newsId;
+
++ (void)setCache:(NewsDetailsModel *)model forNewsId:(NSString *)newsId;
+
++ (void)cacheSizeWithBlock:(void (^)(NSInteger bytes))block;
+
++ (void)clearCacheForNewsId:(NSString *)newsId;
+
++ (void)clearAllCacheWithBlock:(void (^)())block;
 
 @end

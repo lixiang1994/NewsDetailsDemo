@@ -10,4 +10,6 @@
 
 @interface NewsDetailsViewController : BaseViewController
 
+@property (nonatomic , copy ) NSString *newsId;
+
 @end

@@ -66,32 +66,6 @@ $(function(){
 });
 
 /**
- 设置背景颜色
- 
- @param color       颜色字符串 ('FFFFFF')
- @param className   元素名称或id或class (选填 空为body)
- */
-function configBackgroundColor(color,className){
-    
-    var o = className == undefined ? "html" : className;
-    
-    $(o).css({"background-color" : color});
-}
-
-/**
- 设置字体颜色
- 
- @param color       颜色字符串 ('FFFFFF')
- @param className   元素名称或id或class (选填 空为body)
- */
-function configFontColor(color,className){
-    
-    var o = className == undefined ? "body" : className;
-    
-    $(o).css({"color" : color});
-}
-
-/**
  设置字体大小
  
  @param size        字号 ('20')
@@ -178,7 +152,9 @@ function configImgState(state, index, className){
             // 状态置为4
             img.attr({"data-state":4});
             
+            // 隐藏提示
             span.text("");
+            span.hide();
             
             // 判断是否存在gif图标元素 如果有则移除
             if (div.find('img.icon').length > 0) div.find('img.icon').remove();
@@ -189,7 +165,9 @@ function configImgState(state, index, className){
             // 状态置为5
             img.attr({"data-state":5 , "id":""});
             
+            // 隐藏提示
             span.text("");
+            span.hide();
             
             // 移除原有进度条
             if (div.find('div.progress').length > 0){

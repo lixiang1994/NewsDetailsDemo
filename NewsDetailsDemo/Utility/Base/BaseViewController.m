@@ -50,7 +50,8 @@
         default:
             break;
     }
-
+    
+    self.navigationController.navigationBar.hidden = YES;
 }
 
 - (void)viewDidLoad {
@@ -286,7 +287,9 @@
             
         case NavigationBarStyleTypeWhite:
             
-            titleLabel.textColor = [UIColor blackColor];
+            titleLabel.lee_theme
+            .LeeAddTextColor(THEME_DAY, [UIColor blackColor])
+            .LeeAddTextColor(THEME_NIGHT, [UIColor whiteColor]);
             
             break;
             

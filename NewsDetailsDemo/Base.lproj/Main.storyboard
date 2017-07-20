@@ -32,7 +32,7 @@
         <scene sceneID="QSx-hL-0FA">
             <objects>
                 <navigationController extendedLayoutIncludesOpaqueBars="YES" hidesBottomBarWhenPushed="YES" navigationBarHidden="YES" id="bDH-yt-sc6" sceneMemberID="viewController">
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="aNa-Oe-QFq">
+                    <navigationBar key="navigationBar" hidden="YES" contentMode="scaleToFill" id="aNa-Oe-QFq">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>

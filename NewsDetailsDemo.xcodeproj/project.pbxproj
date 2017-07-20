@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		9B7BABF21F1CC44500F9889B /* load_image.png in Resources */ = {isa = PBXBuildFile; fileRef = 9B7BABF11F1CC44500F9889B /* load_image.png */; };
+		9B7BAC0E1F20588E00F9889B /* SettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B7BAC0D1F20588E00F9889B /* SettingViewController.m */; };
+		9B7BAC121F205D0B00F9889B /* SettingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B7BAC111F205D0B00F9889B /* SettingCell.m */; };
+		9B7BAC161F20602C00F9889B /* SettingModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B7BAC151F20602C00F9889B /* SettingModel.m */; };
+		9B7BAC191F2087A400F9889B /* TableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B7BAC181F2087A400F9889B /* TableViewCell.m */; };
+		9B7BAC1D1F2089C200F9889B /* YYFPSLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B7BAC1C1F2089C200F9889B /* YYFPSLabel.m */; };
 		9BAA85701F14B5B30064CAEB /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BAA856F1F14B5B30064CAEB /* main.m */; };
 		9BAA85731F14B5B30064CAEB /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BAA85721F14B5B30064CAEB /* AppDelegate.m */; };
 		9BAA85761F14B5B30064CAEB /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BAA85751F14B5B30064CAEB /* ViewController.m */; };
@@ -160,6 +165,16 @@
 
 /* Begin PBXFileReference section */
 		9B7BABF11F1CC44500F9889B /* load_image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = load_image.png; sourceTree = "<group>"; };
+		9B7BAC0C1F20588E00F9889B /* SettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingViewController.h; sourceTree = "<group>"; };
+		9B7BAC0D1F20588E00F9889B /* SettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingViewController.m; sourceTree = "<group>"; };
+		9B7BAC101F205D0B00F9889B /* SettingCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingCell.h; sourceTree = "<group>"; };
+		9B7BAC111F205D0B00F9889B /* SettingCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingCell.m; sourceTree = "<group>"; };
+		9B7BAC141F20602C00F9889B /* SettingModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingModel.h; sourceTree = "<group>"; };
+		9B7BAC151F20602C00F9889B /* SettingModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingModel.m; sourceTree = "<group>"; };
+		9B7BAC171F2087A400F9889B /* TableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TableViewCell.h; sourceTree = "<group>"; };
+		9B7BAC181F2087A400F9889B /* TableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TableViewCell.m; sourceTree = "<group>"; };
+		9B7BAC1B1F2089C200F9889B /* YYFPSLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YYFPSLabel.h; sourceTree = "<group>"; };
+		9B7BAC1C1F2089C200F9889B /* YYFPSLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YYFPSLabel.m; sourceTree = "<group>"; };
 		9BAA856B1F14B5B30064CAEB /* NewsDetailsDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NewsDetailsDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9BAA856F1F14B5B30064CAEB /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		9BAA85711F14B5B30064CAEB /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -463,6 +478,52 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9B7BAC0A1F20587800F9889B /* Setting */ = {
+			isa = PBXGroup;
+			children = (
+				9B7BAC131F20601F00F9889B /* Model */,
+				9B7BAC0F1F205CEC00F9889B /* Cell */,
+				9B7BAC0B1F20587800F9889B /* Controller */,
+			);
+			path = Setting;
+			sourceTree = "<group>";
+		};
+		9B7BAC0B1F20587800F9889B /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				9B7BAC0C1F20588E00F9889B /* SettingViewController.h */,
+				9B7BAC0D1F20588E00F9889B /* SettingViewController.m */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		9B7BAC0F1F205CEC00F9889B /* Cell */ = {
+			isa = PBXGroup;
+			children = (
+				9B7BAC101F205D0B00F9889B /* SettingCell.h */,
+				9B7BAC111F205D0B00F9889B /* SettingCell.m */,
+			);
+			path = Cell;
+			sourceTree = "<group>";
+		};
+		9B7BAC131F20601F00F9889B /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				9B7BAC141F20602C00F9889B /* SettingModel.h */,
+				9B7BAC151F20602C00F9889B /* SettingModel.m */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		9B7BAC1A1F2089C200F9889B /* YYFPS */ = {
+			isa = PBXGroup;
+			children = (
+				9B7BAC1B1F2089C200F9889B /* YYFPSLabel.h */,
+				9B7BAC1C1F2089C200F9889B /* YYFPSLabel.m */,
+			);
+			path = YYFPS;
+			sourceTree = "<group>";
+		};
 		9BAA85621F14B5B30064CAEB = {
 			isa = PBXGroup;
 			children = (
@@ -485,11 +546,14 @@
 			children = (
 				9BAA85A01F14B79C0064CAEB /* Librarys */,
 				9BAA85851F14B7960064CAEB /* NewsDetails */,
+				9B7BAC0A1F20587800F9889B /* Setting */,
 				9BAA858C1F14B7960064CAEB /* Utility */,
 				9BAA85711F14B5B30064CAEB /* AppDelegate.h */,
 				9BAA85721F14B5B30064CAEB /* AppDelegate.m */,
 				9BAA85741F14B5B30064CAEB /* ViewController.h */,
 				9BAA85751F14B5B30064CAEB /* ViewController.m */,
+				9B7BAC171F2087A400F9889B /* TableViewCell.h */,
+				9B7BAC181F2087A400F9889B /* TableViewCell.m */,
 				9BAA85771F14B5B30064CAEB /* Main.storyboard */,
 				9BAA857A1F14B5B30064CAEB /* Assets.xcassets */,
 				9BAA857C1F14B5B30064CAEB /* LaunchScreen.storyboard */,
@@ -612,6 +676,7 @@
 		9BAA85921F14B7960064CAEB /* View */ = {
 			isa = PBXGroup;
 			children = (
+				9B7BAC1A1F2089C200F9889B /* YYFPS */,
 				9BAA87681F15BA2E0064CAEB /* LEECoolButton */,
 				9BAA871A1F14BD2E0064CAEB /* FontSizeView */,
 				9BAA871D1F14BD2E0064CAEB /* SelectedListView */,
@@ -1297,6 +1362,7 @@
 				9BAA86961F14B79C0064CAEB /* UINavigationController+FDFullscreenPopGesture.m in Sources */,
 				9BAA86991F14B79C0064CAEB /* MBProgressHUD.m in Sources */,
 				9BAA86F71F14B79C0064CAEB /* YYTextView.m in Sources */,
+				9B7BAC191F2087A400F9889B /* TableViewCell.m in Sources */,
 				9BAA86E01F14B79C0064CAEB /* YYWebImageManager.m in Sources */,
 				9BAA86A71F14B79C0064CAEB /* MJRefreshGifHeader.m in Sources */,
 				9BAA86BC1F14B79C0064CAEB /* NSObject+YYAddForARC.m in Sources */,
@@ -1305,6 +1371,7 @@
 				9BAA86C21F14B79C0064CAEB /* YYCGUtilities.m in Sources */,
 				9BAA86B71F14B79C0064CAEB /* NSDictionary+YYAdd.m in Sources */,
 				9BAA86FB1F14B79C0064CAEB /* YYGestureRecognizer.m in Sources */,
+				9B7BAC0E1F20588E00F9889B /* SettingViewController.m in Sources */,
 				9BAA86AC1F14B79C0064CAEB /* NSBundle+MJRefresh.m in Sources */,
 				9BAA86E31F14B79C0064CAEB /* YYClassInfo.m in Sources */,
 				9BAA86B61F14B79C0064CAEB /* NSDate+YYAdd.m in Sources */,
@@ -1353,7 +1420,9 @@
 				9BAA87291F14BD2E0064CAEB /* FontSizeView.m in Sources */,
 				9BAA877E1F186FEA0064CAEB /* ContentManager.m in Sources */,
 				9BAA86CC1F14B79C0064CAEB /* UIScreen+YYAdd.m in Sources */,
+				9B7BAC1D1F2089C200F9889B /* YYFPSLabel.m in Sources */,
 				9BAA872A1F14BD2E0064CAEB /* SelectedListModel.m in Sources */,
+				9B7BAC121F205D0B00F9889B /* SettingCell.m in Sources */,
 				9BAA86CE1F14B79C0064CAEB /* UITableView+YYAdd.m in Sources */,
 				9BAA86B01F14B79C0064CAEB /* README.md in Sources */,
 				9BAA86EC1F14B79C0064CAEB /* YYTextSelectionView.m in Sources */,
@@ -1375,6 +1444,7 @@
 				9BAA86D81F14B79C0064CAEB /* UIButton+YYWebImage.m in Sources */,
 				9BAA869A1F14B79C0064CAEB /* README.mdown in Sources */,
 				9BAA86EA1F14B79C0064CAEB /* YYTextLine.m in Sources */,
+				9B7BAC161F20602C00F9889B /* SettingModel.m in Sources */,
 				9BAA86B41F14B79C0064CAEB /* NSBundle+YYAdd.m in Sources */,
 				9BAA86DF1F14B79C0064CAEB /* YYSpriteSheetImage.m in Sources */,
 				9BAA86BF1F14B79C0064CAEB /* NSThread+YYAdd.m in Sources */,

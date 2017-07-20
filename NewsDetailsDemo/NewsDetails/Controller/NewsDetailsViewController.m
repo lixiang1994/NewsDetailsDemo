@@ -257,14 +257,11 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
             [UIView animateWithDuration:0.3f animations:^{
                 
                 weakSelf.tableView.alpha = 1.0f;
-                
-            } completion:^(BOOL finished) {
-                
             }];
             
         } else {
             
-            
+            // 加载失败 提示用户
         }
         
     };
@@ -367,29 +364,37 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
     
     __weak typeof(self) weakSelf = self;
     
-    [self.api loadDataWithNewsId:@"1994" ResultBlock:^(NewsDetailsModel *model) {
+    [self.api loadDataWithNewsId:self.newsId ResultBlock:^(NewsDetailsModel *model) {
        
         __strong typeof(weakSelf) strongSelf = weakSelf;
         
         if (!strongSelf) return ;
         
-        strongSelf.model = model;
+        if (model) {
+            
+            strongSelf.model = model;
+            
+            strongSelf.headerView.model = model;
+            
+            [strongSelf.dataArray addObject:ADSectionID];
+            
+            [strongSelf.dataArray addObject:ShareSectionID];
+            
+            [strongSelf.dataArray addObject:PraiseSectionID];
+            
+            if (strongSelf.model.aboutArray.count) [strongSelf.dataArray addObject:RelateSectionID];
+            
+            [strongSelf.tableView reloadData];
+            
+            // 加载评论数据
+            
+            [strongSelf.tableView.mj_footer beginRefreshing];
         
-        strongSelf.headerView.model = model;
+        } else {
+            
+            // 请求失败 提示用户
+        }
         
-        [strongSelf.dataArray addObject:ADSectionID];
-        
-        [strongSelf.dataArray addObject:ShareSectionID];
-        
-        [strongSelf.dataArray addObject:PraiseSectionID];
-        
-        if (strongSelf.model.aboutArray.count) [strongSelf.dataArray addObject:RelateSectionID];
-        
-        [strongSelf.tableView reloadData];
-        
-        // 加载评论数据
-        
-        [strongSelf.tableView.mj_footer beginRefreshing];
     }];
     
 }
@@ -891,6 +896,22 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    NSString *sectionIdent = self.dataArray[indexPath.section];
+    
+    if ([sectionIdent isEqualToString:RelateSectionID]) {
+    
+        // 打开相关推荐
+        
+        NewsDetailsViewController *vc = [[NewsDetailsViewController alloc] init];
+        
+        vc.newsId = @"1994";
+        
+        vc.hidesBottomBarWhenPushed = YES;
+        
+        [self.navigationController pushViewController:vc animated:YES];
+    }
+    
 }
 
 @end

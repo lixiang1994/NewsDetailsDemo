@@ -101,6 +101,20 @@ typedef NS_ENUM(NSInteger, ContentImageLoadState) {
 + (BOOL)isLoadImage;
 
 /**
+ 是否仅Wifi加载图片
+
+ @return YES or NO
+ */
++ (BOOL)isOnlyWifiLoad;
+
+/**
+ 设置是否仅Wifi加载图片
+
+ @param isOnlyWifiLoad YES or NO
+ */
++ (void)setIsOnlyWifiLoad:(BOOL)isOnlyWifiLoad;
+
+/**
  字体大小处理
 
  @param size 标准大小

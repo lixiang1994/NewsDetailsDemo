@@ -261,11 +261,39 @@
 
 + (BOOL)isLoadImage{
     
+    BOOL result = NO;
+    
     // 一般用于控制非WIFI情况的图片加载
     
+    if ([ContentManager isOnlyWifiLoad]) {
+        
+        if ([YYReachability reachability].status == YYReachabilityStatusWiFi) {
+            
+            result = YES;
+            
+        } else {
+            
+            result = NO;
+        }
+        
+    } else {
+        
+        result = YES;
+    }
     
+    return result;
+}
+
++ (BOOL)isOnlyWifiLoad{
     
-    return YES;
+    return [[NSUserDefaults standardUserDefaults] boolForKey:@"isOnlyWifiLoad"];
+}
+
++ (void)setIsOnlyWifiLoad:(BOOL)isOnlyWifiLoad{
+    
+    [[NSUserDefaults standardUserDefaults] setBool:isOnlyWifiLoad forKey:@"isOnlyWifiLoad"];
+    
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 + (CGFloat)fontSize:(CGFloat)size{

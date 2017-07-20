@@ -12,6 +12,8 @@
 
 @interface NewsDetailsPraiseCell ()
 
+@property (nonatomic , strong ) UIView *containerView;
+
 @property (nonatomic , strong ) UIButton *praiseButton; //赞按钮
 
 @property (nonatomic , strong ) UIButton *dislikeButton; //不喜欢按钮
@@ -67,6 +69,10 @@
 
 - (void)initSubView{
     
+    _containerView = [UIView new];
+    
+    [self.contentView addSubview:_containerView];
+    
     //赞按钮
     
     _praiseButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -103,7 +109,7 @@
     
     [_praiseButton addTarget:self action:@selector(praiseButtonAction:) forControlEvents:UIControlEventTouchUpInside];
     
-    [self addSubview:_praiseButton];
+    [self.containerView addSubview:_praiseButton];
     
     
     //不喜欢按钮
@@ -142,30 +148,36 @@
     
     [_dislikeButton addTarget:self action:@selector(dislikeButtonAction:) forControlEvents:UIControlEventTouchUpInside];
     
-    [self addSubview:_dislikeButton];
+    [self.containerView addSubview:_dislikeButton];
 }
 
 #pragma mark - 设置自动布局
 
 - (void)configAutoLayout{
     
-    CGFloat margin = self.width / 4;
+    // 容器视图
     
-    //赞按钮
+    _containerView.sd_layout
+    .topSpaceToView(self.contentView, 0.0f)
+    .centerXEqualToView(self.contentView)
+    .widthRatioToView(self.contentView, 0.75f)
+    .heightIs(40.0f);
+    
+    // 赞按钮
     
     _praiseButton.sd_layout
-    .centerXIs(margin)
-    .centerYEqualToView(self)
+    .centerYEqualToView(self.containerView)
     .widthIs(130)
     .heightIs(40);
     
-    //不喜欢按钮
+    // 不喜欢按钮
     
     _dislikeButton.sd_layout
-    .centerXIs(margin * 3)
-    .centerYEqualToView(self)
+    .centerYEqualToView(self.containerView)
     .widthIs(130)
     .heightIs(40);
+    
+    [self.containerView setupAutoMarginFlowItems:@[_praiseButton , _dislikeButton] withPerRowItemsCount:2 itemWidth:130 verticalMargin:0 verticalEdgeInset:0 horizontalEdgeInset:0];
 }
 
 #pragma mark - 设置主题
@@ -197,6 +209,12 @@
         
         self.model.praiseCount += 1;
         
+        self.model.isPraise = YES;
+        
+        // 更新缓存
+        
+        [NewsDetailsModel setCache:self.model forNewsId:self.model.newsId];
+        
         NSString *praiseCountString = [self countStringHandle:self.model.praiseCount];
         
         praiseCountString = [NSString stringWithFormat:@"上头条 %@" , praiseCountString];
@@ -217,6 +235,12 @@
     if (!self.praiseButton.selected && !sender.selected) {
         
         self.model.dislikeCount += 1;
+        
+        self.model.isDislike = YES;
+        
+        // 更新缓存
+        
+        [NewsDetailsModel setCache:self.model forNewsId:self.model.newsId];
         
         NSString *dislikeCountString = [self countStringHandle:self.model.dislikeCount];
         
@@ -250,6 +274,10 @@
         
         [self.dislikeButton setTitle:dislikeCountString forState:UIControlStateNormal];
     }
+    
+    self.praiseButton.selected = model.isPraise;
+    
+    self.dislikeButton.selected = model.isDislike;
     
 }
 

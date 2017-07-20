@@ -16,29 +16,53 @@
     
     dispatch_async(dispatch_queue_create("requestQueue", DISPATCH_QUEUE_CONCURRENT), ^{
        
-        NewsDetailsModel *model = [[NewsDetailsModel alloc] init];
-        
-        model.newsId = @"1994";
-        
-        model.newsTime = @"2小时前";
-        
-        model.newsTitle = @"猫：喜欢猴子养一个呗，在这折腾我干嘛？";
-        
-        model.newsHtml = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"FakeData" ofType:@""] encoding:NSUTF8StringEncoding error:nil];
-        
-        model.aboutArray = @[[NSNull null] ,
-                             [NSNull null] ,
-                             [NSNull null] ,
-                             [NSNull null] ,
-                             [NSNull null] ];
-        
-        model.praiseCount = arc4random_uniform(100000);
-        
-        model.dislikeCount = arc4random_uniform(100000);
-        
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.0f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            if (resultBlock) resultBlock(model);
-        });
+        // 请求时可以考虑判断网络状态 如果无网络时 可以使用缓存
+       
+        if ([YYReachability reachability].isReachable) {
+            
+            // 有网络 模拟请求
+            
+            NewsDetailsModel * model = [[NewsDetailsModel alloc] init];
+            
+            model.newsId = newsId;
+            
+            model.newsTime = [NSString stringWithFormat:@"%d小时前" , (arc4random()%12 + 1)];
+            
+            model.newsTitle = @"猫：喜欢猴子养一个呗，在这折腾我干嘛？";
+            
+            model.newsHtml = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"FakeData" ofType:@""] encoding:NSUTF8StringEncoding error:nil];
+            
+            model.aboutArray = @[[NSNull null] ,
+                                 [NSNull null] ,
+                                 [NSNull null] ,
+                                 [NSNull null] ,
+                                 [NSNull null] ];
+            
+            model.praiseCount = arc4random_uniform(100000);
+            
+            model.dislikeCount = arc4random_uniform(100000);
+            
+            // 模拟加载完成后 添加到缓存
+            
+            [NewsDetailsModel setCache:model forNewsId:model.newsId];
+            
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                
+                if (resultBlock) resultBlock(model);
+            });
+            
+        } else {
+            
+            // 无网络 使用缓存
+            
+            NewsDetailsModel *model = [NewsDetailsModel cacheForNewsId:newsId];
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+               
+                if (resultBlock) resultBlock(model);
+            });
+            
+        }
         
     });
     

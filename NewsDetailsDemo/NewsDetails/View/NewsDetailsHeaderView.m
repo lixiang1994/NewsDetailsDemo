@@ -354,16 +354,17 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
      
      - 正则过滤出所有img标签的字符串
      - 获取img标签的src值
-     - 根据src查询缓存是否存在
-     - 如果缓存存在则直接将缓存路径设置到src 并将状态置为4(加载完成)
-     - 如果缓存不存在则根据是否可以加载图片将默认图片缓存设置到src 并设置相应的状态.
-     - 其中如果图片类型为Gif, 则拼接jpg静态图参数 优先加载静态图, js通过设置data-gif属性来判断类型.
+     - 根据src查询原图缓存是否存在 如不存在则继续查询缩略图缓存
+     - 如果缓存存在则直接将缓存路径设置到src 并将状态置为4 或 5 (Gif类型缩略图加载完成状态为5)
+     - 如果缓存不存在则根据是否可以加载图片设置相应的状态.
+     - 获取原img标签字符串中的宽高属性值 如果存在 则按照比例计算出新的宽高设置.
+     - 黑白主题样式是通过标签的ClassName区分的 根据当前主题添加相应的ClassName (CSS中有定义).
      - 将以上处理组合成一个新的标签元素字符串 并替换html中原来img标签字符串.
      
      新标签格式如下:
      
-     <div class="image">
-     <img class="image" src="" data-thumbnail="" data-original=""  data-gif="0" data-state="0" data-index="0"/>
+     <div class="image white">
+     <img class="image white" src="" data-thumbnail="" data-original=""  data-gif="0" data-state="0" data-index="0"/>
      <span class="load"></span>
      </div>
      */
@@ -399,8 +400,6 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
                                                      range:NSMakeRange(0, contentHTMLString.length)];
             
             // 遍历匹配后的每一条记录
-            
-            NSInteger index = 0;
             
             for (NSTextCheckingResult *match in matches) {
                 
@@ -506,14 +505,15 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
                     
                     [imageString appendString:@"</div>"];
                     
-                    NSString *imgString = [htmlString substringWithRange:[match range]]; // 原img标签字符串
+                    // 原img标签字符串
+                    
+                    NSString *imgString = [htmlString substringWithRange:[match range]];
                     
                     // 替换原有标签
                     
                     [contentHTMLString replaceCharactersInRange:[contentHTMLString rangeOfString:imgString] withString:imageString];
                 }
                 
-                index ++;
             }
             
         }
@@ -587,7 +587,6 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
             
         }
         
-        
     }
     
     return value;
@@ -611,9 +610,13 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
         }];
     }
     
+    __weak typeof(self) weakSelf = self;
+    
     dispatch_group_notify(group, dispatch_get_main_queue(), ^{
         
-        [self updateHeight];
+        if (!weakSelf) return ;
+        
+        [weakSelf updateHeight];
     });
 }
 
@@ -791,11 +794,11 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
             [weakSelf.imageInfoArray replaceObjectAtIndex:index withObject:response];
         }
         
-        if (resultBlock) resultBlock();
-        
         // 更新webview高度
         
         [weakSelf updateHeight];
+        
+        if (resultBlock) resultBlock();
     }];
     
 }
@@ -865,6 +868,8 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
     });
     
 }
+
+#pragma mark - 打开图片浏览
 
 - (void)openPhotoBrowserWithUrlArray:(NSArray *)urlArray Index:(NSInteger)index{
     
@@ -1140,15 +1145,21 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
     // 打印所传过来的参数，只支持NSNumber, NSString, NSDate, NSArray,
     // NSDictionary, and NSNull类型
     
+    // 加载图片
+    
     if ([message.name isEqualToString:ScriptName_loadImage]) {
         
         [self loadImage:[message.body integerValue] ResultBlock:^{}];
     }
     
+    // 加载Gif图片
+    
     if ([message.name isEqualToString:ScriptName_loadGifImage]) {
         
         [self loadGifImage:[message.body integerValue] ResultBlock:^{}];
     }
+    
+    // 点击图片
     
     if ([message.name isEqualToString:ScriptName_clickImage]) {
         
