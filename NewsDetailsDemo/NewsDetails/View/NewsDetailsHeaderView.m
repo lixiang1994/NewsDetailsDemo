@@ -478,7 +478,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
                     
                     [imageString appendFormat:@" data-original=\"%@\"" , original];
                     
-                    [imageString appendFormat:@" data-state=\"%ld\"" , state];
+                    [imageString appendFormat:@" data-state=\"%ld\"" , (long)state];
                     
                     if (width && height) {
                         
@@ -536,13 +536,17 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
                            <script src=\"../js/WebContentHandle.js\"></script>\
                            </html>" , styleType , fontSize , contentHTMLString];
         
-        NSString *htmlPath = [[ContentManager getCachePath:@"html"] stringByAppendingPathComponent:[NSString stringWithFormat:@"newsContent.html"]];
+        NSString *htmlPath = [[ContentManager getCachePath:@"html"] stringByAppendingPathComponent:@"newsContent.html"];
         
-        [frame writeToFile:htmlPath atomically:YES encoding:NSUTF8StringEncoding error:NULL];
+        NSURL *htmlUrl = [NSURL fileURLWithPath:htmlPath];
+        
+        NSError *error = nil;
+        
+        [frame writeToURL:htmlUrl atomically:YES encoding:NSUTF8StringEncoding error:&error];
         
         dispatch_async(dispatch_get_main_queue(), ^{
            
-            [strongSelf.webView loadRequest:[NSURLRequest requestWithURL:[NSURL fileURLWithPath:htmlPath]]];
+            if (!error) [strongSelf.webView loadRequest:[NSURLRequest requestWithURL:htmlUrl]];
         });
         
     });
@@ -693,7 +697,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
     
     // 设置加载中状态
     
-    [self.webView evaluateJavaScript:[NSString stringWithFormat:@"configImgState('1' , '%ld');" , index] completionHandler:^(id _Nullable response, NSError * _Nullable error) {
+    [self.webView evaluateJavaScript:[NSString stringWithFormat:@"configImgState('1' , '%ld');" , (long)index] completionHandler:^(id _Nullable response, NSError * _Nullable error) {
         
         if (!weakSelf) return;
         
@@ -717,7 +721,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
                 
                 // 设置加载失败状态
                 
-                NSString *configJS = [NSString stringWithFormat:@"configImgState('3' , '%ld');" , index];
+                NSString *configJS = [NSString stringWithFormat:@"configImgState('3' , '%ld');" , (long)index];
                 
                 [weakSelf.webView evaluateJavaScript:configJS completionHandler:^(id _Nullable response, NSError * _Nullable error) {
                     
@@ -769,11 +773,24 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
         
         // 加载图片
         
+        __block CGFloat currentProgress = 0.0f;
+        
         [ContentManager loadImage:[NSURL URLWithString:original] ProgressBlock:^(CGFloat progress) {
             
             if (!weakSelf) return ;
             
-            [weakSelf.webView evaluateJavaScript:[NSString stringWithFormat:@"configLoadingProgress('%ld' , '%.2f');" , index, progress] completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
+            progress = progress * 100;
+            
+            // 限制更新频率 每次超过10% 更新一次
+            
+            if ((progress - currentProgress >= 10 && currentProgress != progress) ||
+                progress == 0 ||
+                progress == 100) {
+                
+                [weakSelf.webView evaluateJavaScript:[NSString stringWithFormat:@"configLoadingProgress('%ld' , '%.0f');" , (long)index, progress ? : 1.0f] completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
+                
+                currentProgress = progress;
+            }
             
         } ResultBlock:^(NSString *cachePath, BOOL result) {
             
@@ -791,7 +808,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
                 
                 // 设置加载失败状态 (gif图片失败 则重新设置为5)
                 
-                NSString *configJS = [NSString stringWithFormat:@"configImgState('5' , '%ld');" , index];
+                NSString *configJS = [NSString stringWithFormat:@"configImgState('5' , '%ld');" , (long)index];
                 
                 [weakSelf.webView evaluateJavaScript:configJS completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
             }
@@ -808,7 +825,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
     
     // 设置图片Url和完成状态
     
-    NSString *js = [NSString stringWithFormat:@"setImageUrl('%ld' , '%@'); configImgState('%ld' , '%ld'); getImageInfo('%ld');" , index , [NSURL fileURLWithPath:imagepath].absoluteString , state , index , index];
+    NSString *js = [NSString stringWithFormat:@"setImageUrl('%ld' , '%@'); configImgState('%ld' , '%ld'); getImageInfo('%ld');" , (long)index , [NSURL fileURLWithPath:imagepath].absoluteString , (long)state , (long)index , (long)index];
     
     [self.webView evaluateJavaScript:js completionHandler:^(id _Nullable response, NSError * _Nullable error) {
         
@@ -848,7 +865,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
     
     NSInteger fontSize = [ContentManager fontSize:16.0f + level * 2];
     
-    NSString *js = [NSString stringWithFormat:@"configFontSize('%ld')" , fontSize];
+    NSString *js = [NSString stringWithFormat:@"configFontSize('%ld')" , (long)fontSize];
     
     //设置字体大小
     

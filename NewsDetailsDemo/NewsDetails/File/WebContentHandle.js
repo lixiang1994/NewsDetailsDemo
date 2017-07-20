@@ -405,10 +405,10 @@ function configLoadingProgress(index, progress, className){
         
         // 设置进度条div宽度百分比
         var radialObj = div.find('div.progress').data('radialIndicator');
-        radialObj.animate(progress * 100);
+        radialObj.animate(progress);
     }
     
-    if (progress == 1) {
+    if (progress == 100) {
         
         if (div.find('div.progress').length > 0){
             
