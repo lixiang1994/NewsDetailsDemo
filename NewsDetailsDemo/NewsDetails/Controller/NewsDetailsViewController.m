@@ -442,7 +442,7 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
             
             // 加载评论数据
             
-            [strongSelf.tableView.mj_footer beginRefreshing];
+            // [strongSelf.tableView.mj_footer beginRefreshing];
         
         } else {
             
