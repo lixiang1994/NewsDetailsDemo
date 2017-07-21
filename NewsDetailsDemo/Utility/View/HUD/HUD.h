@@ -8,25 +8,25 @@
 
 #import "MBProgressHUD.h"
 
-typedef NS_ENUM(NSInteger, MierProgressHUDStatus) {
+typedef NS_ENUM(NSInteger, HUDStatus) {
     
     /** 成功 */
-    MierProgressHUDStatusSuccess,
+    HUDStatusSuccess,
     
     /** 失败 */
-    MierProgressHUDStatusError,
+    HUDStatusError,
     
     /** 提示 */
-    MierProgressHUDStatusInfo,
+    HUDStatusInfo,
     
     /** 星标 */
-    MierProgressHUDStatusStar,
+    HUDStatusStar,
     
     /** 空心星标 */
-    MierProgressHUDStatusHollowStar,
+    HUDStatusHollowStar,
     
     /** 等待 */
-    MierProgressHUDStatusWaitting
+    HUDStatusWaitting
 };
 
 @interface HUD : MBProgressHUD
@@ -35,7 +35,7 @@ typedef NS_ENUM(NSInteger, MierProgressHUDStatus) {
 + (instancetype)sharedHUD;
 
 /** 在 window 上添加一个 HUD */
-+ (void)showStatus:(MierProgressHUDStatus)status text:(NSString *)text;
++ (void)showStatus:(HUDStatus)status text:(NSString *)text;
 
 #pragma mark - 建议使用的方法
 
@@ -69,7 +69,7 @@ typedef NS_ENUM(NSInteger, MierProgressHUDStatus) {
 @interface UIView (HUD)
 
 /** 在 view 上添加一个 HUD */
-- (void)showStatus:(MierProgressHUDStatus)status text:(NSString *)text;
+- (void)showStatus:(HUDStatus)status text:(NSString *)text;
 
 #pragma mark - 建议使用的方法
 

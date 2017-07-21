@@ -36,7 +36,7 @@
     return hud;
 }
 
-+ (void)showStatus:(MierProgressHUDStatus)status text:(NSString *)text {
++ (void)showStatus:(HUDStatus)status text:(NSString *)text {
     
     [[HUD getMainWindow] showStatus:status text:text];
 }
@@ -50,32 +50,32 @@
 
 + (void)showInfoMsg:(NSString *)text {
     
-    [[HUD getMainWindow] showStatus:MierProgressHUDStatusInfo text:text];
+    [[HUD getMainWindow] showStatus:HUDStatusInfo text:text];
 }
 
 + (void)showFailure:(NSString *)text {
     
-    [[HUD getMainWindow] showStatus:MierProgressHUDStatusError text:text];
+    [[HUD getMainWindow] showStatus:HUDStatusError text:text];
 }
 
 + (void)showSuccess:(NSString *)text {
     
-    [[HUD getMainWindow] showStatus:MierProgressHUDStatusSuccess text:text];
+    [[HUD getMainWindow] showStatus:HUDStatusSuccess text:text];
 }
 
 + (void)showAddFavorites:(NSString *)text{
     
-    [[HUD getMainWindow] showStatus:MierProgressHUDStatusStar text:text];
+    [[HUD getMainWindow] showStatus:HUDStatusStar text:text];
 }
 
 + (void)showRemoveFavorites:(NSString *)text{
     
-    [[HUD getMainWindow] showStatus:MierProgressHUDStatusHollowStar text:text];
+    [[HUD getMainWindow] showStatus:HUDStatusHollowStar text:text];
 }
 
 + (void)showLoading:(NSString *)text {
     
-    [[HUD getMainWindow] showStatus:MierProgressHUDStatusWaitting text:text];
+    [[HUD getMainWindow] showStatus:HUDStatusWaitting text:text];
 }
 
 + (void)hide {
@@ -92,7 +92,7 @@
 
 @implementation UIView (HUD)
 
-- (void)showStatus:(MierProgressHUDStatus)status text:(NSString *)text{
+- (void)showStatus:(HUDStatus)status text:(NSString *)text{
     
     HUD *hud = [HUD sharedHUD];
     
@@ -120,7 +120,7 @@
     
     switch (status) {
             
-        case MierProgressHUDStatusSuccess: {
+        case HUDStatusSuccess: {
             
             //            NSString *sucPath = [bundlePath stringByAppendingPathComponent:@"hud_success@2x.png"];
             //            UIImage *sucImage = [UIImage imageWithContentsOfFile:sucPath];
@@ -134,7 +134,7 @@
         }
             break;
             
-        case MierProgressHUDStatusError: {
+        case HUDStatusError: {
             
             //            NSString *errPath = [bundlePath stringByAppendingPathComponent:@"hud_error@2x.png"];
             //            UIImage *errImage = [UIImage imageWithContentsOfFile:errPath];
@@ -148,14 +148,14 @@
         }
             break;
             
-        case MierProgressHUDStatusWaitting: {
+        case HUDStatusWaitting: {
             
             hud.mode = MBProgressHUDModeIndeterminate;
             [hud setUserInteractionEnabled:NO];
         }
             break;
             
-        case MierProgressHUDStatusInfo: {
+        case HUDStatusInfo: {
             
             NSString *infoPath = [bundlePath stringByAppendingPathComponent:@"hud_info@2x.png"];
             UIImage *infoImage = [UIImage imageWithContentsOfFile:infoPath];
@@ -168,7 +168,7 @@
         }
             break;
             
-        case MierProgressHUDStatusStar: {
+        case HUDStatusStar: {
             
             //            NSString *starPath = [bundlePath stringByAppendingPathComponent:@"hud_info@2x.png"];
             //            UIImage *starImage = [UIImage imageWithContentsOfFile:starPath];
@@ -182,7 +182,7 @@
         }
             break;
             
-        case MierProgressHUDStatusHollowStar: {
+        case HUDStatusHollowStar: {
             
             //            NSString *starPath = [bundlePath stringByAppendingPathComponent:@"hud_info@2x.png"];
             //            UIImage *starImage = [UIImage imageWithContentsOfFile:starPath];
@@ -231,42 +231,42 @@
 
 - (void)showInfoMsg:(NSString *)text{
     
-    [self showStatus:MierProgressHUDStatusInfo text:text];
+    [self showStatus:HUDStatusInfo text:text];
 }
 
 #pragma mark - 在 view 上添加一个提示`失败`的 HUD
 
 - (void)showFailure:(NSString *)text{
     
-    [self showStatus:MierProgressHUDStatusError text:text];
+    [self showStatus:HUDStatusError text:text];
 }
 
 #pragma mark - 在 view 上添加一个提示`成功`的 HUD
 
 - (void)showSuccess:(NSString *)text{
     
-    [self showStatus:MierProgressHUDStatusSuccess text:text];
+    [self showStatus:HUDStatusSuccess text:text];
 }
 
 #pragma mark - 在 view 上添加一个提示`收藏成功`的 HUD
 
 - (void)showAddFavorites:(NSString *)text{
     
-    [self showStatus:MierProgressHUDStatusStar text:text];
+    [self showStatus:HUDStatusStar text:text];
 }
 
 #pragma mark - 在 view 上添加一个提示`取消收藏`的 HUD
 
 - (void)showRemoveFavorites:(NSString *)text{
     
-    [self showStatus:MierProgressHUDStatusHollowStar text:text];
+    [self showStatus:HUDStatusHollowStar text:text];
 }
 
 #pragma mark - 在 view 上添加一个提示`等待`的 HUD, 需要手动关闭
 
 - (void)showLoading:(NSString *)text{
     
-    [self showStatus:MierProgressHUDStatusWaitting text:text];
+    [self showStatus:HUDStatusWaitting text:text];
 }
 
 #pragma mark - 手动隐藏 HUD
