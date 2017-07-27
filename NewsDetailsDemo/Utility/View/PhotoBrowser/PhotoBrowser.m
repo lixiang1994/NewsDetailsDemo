@@ -831,6 +831,8 @@ static UIWindow *browserWindow;
     
     UIImage *image = self.imageView.image;
     
+    if (!image) return;
+    
     CGFloat width =  image.size.width;
     
     CGFloat height = image.size.height;
