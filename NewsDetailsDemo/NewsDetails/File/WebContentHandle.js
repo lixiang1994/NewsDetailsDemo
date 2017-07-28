@@ -3,6 +3,7 @@ $(function(){
   
   var body = $("body");
   
+  // 禁止文字自动缩放
   body.css("webkitTextSizeAdjust" , "none");
   
   var divs = body.find("div.image");
@@ -64,6 +65,37 @@ $(function(){
              });
   
 });
+
+function scroll(top, height){
+    
+    var divs = $("body").find("div.image");
+    
+    // 遍历图片元素
+    for(var i = 0; i < divs.length; i++){
+        
+        var div = divs.eq(i);
+        
+        var img = div.find("img.image");
+        
+        // 判断元素是否在可视范围内
+        if((div.offset().top < top + height && div.offset().top + div.height() > top)){
+            
+            var index = img.attr("data-index");
+            
+            var state = img.attr("data-state");
+            
+            // 判断是否为初始状态
+            if (parseInt(state) == 0) {
+                
+                // 加载图片
+                window.webkit.messageHandlers.loadImage.postMessage(index);
+            }
+            
+        }
+        
+    }
+    
+}
 
 /**
  设置字体大小
@@ -296,11 +328,11 @@ function getImageInfo(index,className){
     
     if(!img) return; //没有找到图片
     
-    return {"current" : img.attr("src") , "thumbnail" : img.attr("data-thumbnail") , "original" : img.attr("data-original") , "gif" : img.attr("data-gif")};
+    return {"current" : img.attr("src") , "thumbnail" : img.attr("data-thumbnail") , "original" : img.attr("data-original") , "gif" : img.attr("data-gif") , "top" : img.offset().top , "width" : img.width() , "height" : img.height()};
 }
 
 /**
- 返回所有图片信息 ({"" : "" , "" : "" , "" : ""})
+ 返回所有图片信息
  
  @param className   元素名称或id或class (选填 空为body)
  */

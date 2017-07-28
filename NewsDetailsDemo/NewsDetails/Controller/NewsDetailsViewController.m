@@ -968,4 +968,11 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
     
 }
 
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
+    
+    // 传递滑动
+    
+    [self.headerView scroll:scrollView.contentOffset];
+}
+
 @end

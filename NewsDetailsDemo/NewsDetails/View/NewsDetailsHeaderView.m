@@ -129,6 +129,8 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
     _displayLink.paused = YES;
     
     [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
+    
+    _loadMode = ContentImageLoadModeScroll;
 }
 
 #pragma mark - 初始化子视图
@@ -771,47 +773,53 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
         
     } else {
         
-        // 加载图片
+        // 加载图片 进度置为0 清空原有进度视图 进度置为1 创建进度视图
         
-        __block CGFloat currentProgress = 0.0f;
+        [self.webView evaluateJavaScript:[NSString stringWithFormat:@"configLoadingProgress('%ld' , '0'); configLoadingProgress('%ld' , '1');" , (long)index, (long)index] completionHandler:^(id _Nullable response, NSError * _Nullable error) {
         
-        [ContentManager loadImage:[NSURL URLWithString:original] ProgressBlock:^(CGFloat progress) {
-            
             if (!weakSelf) return ;
+           
+            __block CGFloat currentProgress = 0.0f;
             
-            progress = progress * 100;
-            
-            // 限制更新频率 每次超过10% 更新一次
-            
-            if ((progress - currentProgress >= 10 && currentProgress != progress) ||
-                progress == 0 ||
-                progress == 100) {
+            [ContentManager loadImage:[NSURL URLWithString:original] ProgressBlock:^(CGFloat progress) {
                 
-                [weakSelf.webView evaluateJavaScript:[NSString stringWithFormat:@"configLoadingProgress('%ld' , '%.0f');" , (long)index, progress ? : 1.0f] completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
+                if (!weakSelf) return ;
                 
-                currentProgress = progress;
-            }
-            
-        } ResultBlock:^(NSString *cachePath, BOOL result) {
-            
-            if (!weakSelf) return;
-            
-            // 判断结果 并设置相应的状态
-            
-            if (result) {
+                progress = progress * 100;
                 
-                // 设置图片Url和完成状态
+                // 限制更新频率 每次超过10% 更新一次
                 
-                [weakSelf loadImageFinishHandleWithIndex:index State:ContentImageLoadStateFinish ImagePath:cachePath ResultBlock:resultBlock];
+                if ((progress - currentProgress >= 10 && currentProgress != progress) ||
+                    progress == 0 ||
+                    progress == 100) {
+                    
+                    [weakSelf.webView evaluateJavaScript:[NSString stringWithFormat:@"configLoadingProgress('%ld' , '%.0f');" , (long)index, progress ? : 1.0f] completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
+                    
+                    currentProgress = progress;
+                }
                 
-            } else {
+            } ResultBlock:^(NSString *cachePath, BOOL result) {
                 
-                // 设置加载失败状态 (gif图片失败 则重新设置为5)
+                if (!weakSelf) return;
                 
-                NSString *configJS = [NSString stringWithFormat:@"configImgState('5' , '%ld');" , (long)index];
+                // 判断结果 并设置相应的状态
                 
-                [weakSelf.webView evaluateJavaScript:configJS completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
-            }
+                if (result) {
+                    
+                    // 设置图片Url和完成状态
+                    
+                    [weakSelf loadImageFinishHandleWithIndex:index State:ContentImageLoadStateFinish ImagePath:cachePath ResultBlock:resultBlock];
+                    
+                } else {
+                    
+                    // 设置加载失败状态 (gif图片失败 则重新设置为5)
+                    
+                    NSString *configJS = [NSString stringWithFormat:@"configImgState('5' , '%ld');" , (long)index];
+                    
+                    [weakSelf.webView evaluateJavaScript:configJS completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
+                }
+                
+            }];
             
         }];
         
@@ -831,12 +839,9 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
         
         if (!weakSelf) return;
         
-        if (response) {
-            
-            // 更新图片信息
-            
-            [weakSelf.imageInfoArray replaceObjectAtIndex:index withObject:response];
-        }
+        // 更新图片信息
+        
+        if (response) [weakSelf.imageInfoArray replaceObjectAtIndex:index withObject:response];
         
         // 更新webview高度
         
@@ -865,7 +870,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
     
     NSInteger fontSize = [ContentManager fontSize:16.0f + level * 2];
     
-    NSString *js = [NSString stringWithFormat:@"configFontSize('%ld')" , (long)fontSize];
+    NSString *js = [NSString stringWithFormat:@"configFontSize('%ld');" , (long)fontSize];
     
     //设置字体大小
     
@@ -890,7 +895,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
         
         if (!weakSelf) return ;
         
-        [weakSelf.webView evaluateJavaScript:@"getContentHeight()" completionHandler:^(id _Nullable response, NSError * _Nullable error) {
+        [weakSelf.webView evaluateJavaScript:@"getContentHeight();" completionHandler:^(id _Nullable response, NSError * _Nullable error) {
             
             if (!weakSelf) return ;
             
@@ -910,6 +915,37 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
         }];
         
     });
+    
+}
+
+- (void)scroll:(CGPoint)offset{
+    
+    // 判断图片加载模式
+    
+    if (self.loadMode == ContentImageLoadModeScroll) {
+        
+        __weak typeof(self) weakSelf = self;
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            if (!weakSelf) return ;
+            
+            // 判断webview是否在可视范围
+            
+            if (offset.y >= weakSelf.webView.top && offset.y <= weakSelf.webView.bottom) {
+                
+                // 获取top距离 和 可视高度
+                
+                CGFloat top = offset.y > weakSelf.webView.top ? offset.y - weakSelf.webView.top : 0.0f;
+                
+                CGFloat height = CGRectGetHeight([[UIScreen mainScreen] bounds]) - 64.0f;
+                
+                [weakSelf.webView evaluateJavaScript:[NSString stringWithFormat:@"scroll(%.0f , %.0f);" , top , height] completionHandler:^(id _Nullable response, NSError * _Nullable error) {}];
+            }
+            
+        });
+        
+    }
     
 }
 
@@ -1118,7 +1154,25 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
             
             // 加载图片
             
-            [weakSelf loadImages];
+            switch (weakSelf.loadMode) {
+                    
+                case ContentImageLoadModeAll:
+                    
+                    [weakSelf loadImages];
+                    
+                    break;
+                    
+                case ContentImageLoadModeScroll:
+                    
+                    [weakSelf scroll:CGPointMake(0, weakSelf.webView.top)];
+                    
+                    break;
+                    
+                default:
+                    break;
+            }
+            
+            
         }
         
     }];

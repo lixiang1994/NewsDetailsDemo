@@ -14,6 +14,8 @@
 
 @interface NewsDetailsHeaderView : UIView
 
+@property (nonatomic , assign ) ContentImageLoadMode loadMode;
+
 @property (nonatomic , strong ) NewsDetailsModel *model;
 
 @property (nonatomic , copy ) void (^loadedFinishBlock)(BOOL);//加载完成Block
@@ -23,5 +25,7 @@
 - (void)configFontLevel:(NSInteger)level;
 
 - (void)updateHeight;
+
+- (void)scroll:(CGPoint)offset;
 
 @end

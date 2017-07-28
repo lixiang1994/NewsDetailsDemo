@@ -24,6 +24,14 @@ typedef NS_ENUM(NSInteger, ContentImageLoadState) {
     ContentImageLoadStateGif        = 5,
 };
 
+typedef NS_ENUM(NSInteger, ContentImageLoadMode) {
+    
+    /** 内容图片加载状态 全部加载 */
+    ContentImageLoadModeAll    = 0 ,
+    /** 内容图片加载模式 滑动加载 */
+    ContentImageLoadModeScroll    = 1,
+};
+
 @interface ContentManager : NSObject
 
 /**
