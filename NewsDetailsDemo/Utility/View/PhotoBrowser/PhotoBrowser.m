@@ -8,9 +8,13 @@
 
 #import "PhotoBrowser.h"
 
+#import <Photos/Photos.h>
+
 #import "HUD.h"
 
 static UIWindow *browserWindow;
+
+static NSString *photoAssetCollectionName = @"LEE";
 
 @interface PhotoBrowser ()
 
@@ -426,6 +430,64 @@ static UIWindow *browserWindow;
 
 - (void)saveImageWithIndex:(NSInteger)index{
     
+    __weak typeof(self) weakSelf = self;
+    
+    /*
+     PHAuthorizationStatusNotDetermined,     用户还没有做出选择
+     PHAuthorizationStatusDenied,            用户拒绝当前应用访问相册(用户当初点击了"不允许")
+     PHAuthorizationStatusAuthorized         用户允许当前应用访问相册(用户当初点击了"好")
+     PHAuthorizationStatusRestricted,        因为家长控制, 导致应用无法方法相册(跟用户的选择没有关系)
+     */
+    
+    // 判断授权状态
+    
+    PHAuthorizationStatus status = [PHPhotoLibrary authorizationStatus];
+    
+    switch (status) {
+            
+        case PHAuthorizationStatusAuthorized:
+            
+            // 可以访问
+            
+            break;
+            
+        case PHAuthorizationStatusNotDetermined:
+        {
+            // 第一次访问
+            
+            [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
+                
+                if (status == PHAuthorizationStatusAuthorized) {
+                    
+                    // 允许
+                    
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        
+                        if (weakSelf) [weakSelf saveImageWithIndex:index];
+                    });
+                    
+                } else {
+                    
+                    return ;
+                }
+                
+            }];
+            
+            return;
+        }
+            break;
+            
+        default:
+        {
+            NSURL *url = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+            
+            if ([[UIApplication sharedApplication] canOpenURL:url]) [[UIApplication sharedApplication] openURL:url];
+            
+            return;
+        }
+            break;
+    }
+    
     // 获取当前图片的URL
     
     NSURL *url = [self.browser.imageUrlArray objectAtIndex:index];
@@ -436,24 +498,147 @@ static UIWindow *browserWindow;
         
         // 获取图片
         
-        UIImage *image = [manager.cache getImageForKey:[manager cacheKeyForURL:url]];
+        NSData *data = [manager.cache getImageDataForKey:[manager cacheKeyForURL:url]];
         
-        if (image) {
+        __block NSString *assetLocalIdentifier;
+        
+        [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
             
-            // 存储图片到本地相册
+            // 1.保存图片到相机胶卷中----创建图片的请求
             
-            UIImageWriteToSavedPhotosAlbum(image, self, @selector(image:didFinishSavingWithError:contextInfo:), NULL);
+            if ([PHAssetCreationRequest class]) {
+                
+                PHAssetCreationRequest *request = [PHAssetCreationRequest creationRequestForAsset];
+                
+                [request addResourceWithType:PHAssetResourceTypePhoto data:data options:nil];
+                
+                assetLocalIdentifier = request.placeholderForCreatedAsset.localIdentifier;
+                
+            } else {
+                
+                // iOS9以下
+                
+                NSString *tempCachePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"tempSaveImage"];
+                
+                [data writeToFile:tempCachePath atomically:YES];
+                
+                PHAssetChangeRequest *request = [PHAssetChangeRequest creationRequestForAssetFromImageAtFileURL:[NSURL fileURLWithPath:tempCachePath]];
+                
+                assetLocalIdentifier = request.placeholderForCreatedAsset.localIdentifier;
+                
+                [[NSFileManager defaultManager] removeItemAtPath:tempCachePath error:nil];
+            }
             
-        } else {
+        } completionHandler:^(BOOL success, NSError * _Nullable error) {
             
-            [self.view showMessage:@"保存图片失败"];
-        }
+            if(success == NO){
+                
+                NSLog(@"保存图片失败----(创建图片的请求)");
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    
+                    if (weakSelf) [weakSelf.view showMessage:@"保存失败"];
+                });
+                
+                return ;
+            }
+            
+            // 2.获得相簿
+            
+            PHAssetCollection *createdAssetCollection = [self createAssetCollection];
+            
+            if (createdAssetCollection == nil) {
+                
+                NSLog(@"保存图片成功----(创建相簿失败!)");
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    
+                    if (weakSelf) [weakSelf.view showMessage:@"保存成功"];
+                });
+                
+                return;
+            }
+            
+            // 3.将刚刚添加到"相机胶卷"中的图片到"自己创建相簿"中
+            
+            [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                
+                // 获得图片
+                
+                PHAsset *asset = [PHAsset fetchAssetsWithLocalIdentifiers:@[assetLocalIdentifier] options:nil].lastObject;
+                
+                // 添加图片到相簿中的请求
+                
+                PHAssetCollectionChangeRequest *request = [PHAssetCollectionChangeRequest changeRequestForAssetCollection:createdAssetCollection];
+                
+                // 添加图片到相簿
+                
+                [request addAssets:@[asset]];
+                
+            } completionHandler:^(BOOL success, NSError * _Nullable error) {
+                
+                if(success){
+                    
+                    NSLog(@"保存图片到创建的相簿成功");
+                    
+                } else {
+                    
+                    NSLog(@"保存图片到创建的相簿失败");
+                }
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    
+                    if (weakSelf) [weakSelf.view showMessage:@"保存成功"];
+                });
+                
+            }];
+            
+        }];
         
     } else {
         
         [self.view showMessage:@"保存图片失败"];
     }
     
+}
+
+#pragma mark - 获得相簿
+
+- (PHAssetCollection *)createAssetCollection{
+    
+    // 判断是否已存在
+    
+    PHFetchResult<PHAssetCollection *> *assetCollections = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumRegular options:nil];
+    
+    for (PHAssetCollection * assetCollection in assetCollections) {
+        
+        if ([assetCollection.localizedTitle isEqualToString:photoAssetCollectionName]) {
+            
+            //说明已经存在
+            
+            return assetCollection;
+        }
+    }
+    
+    // 创建新的相簿
+    
+    __block NSString *assetCollectionLocalIdentifier = nil;
+    
+    NSError *error = nil;
+    
+    //同步方法
+    
+    [[PHPhotoLibrary sharedPhotoLibrary] performChangesAndWait:^{
+        
+        // 创建相簿的请求
+        
+        assetCollectionLocalIdentifier = [PHAssetCollectionChangeRequest creationRequestForAssetCollectionWithTitle:photoAssetCollectionName].placeholderForCreatedAssetCollection.localIdentifier;
+        
+    } error:&error];
+    
+    if (error)return nil;
+    
+    return [PHAssetCollection fetchAssetCollectionsWithLocalIdentifiers:@[assetCollectionLocalIdentifier] options:nil].lastObject;
 }
 
 #pragma mark - 图片保存回调方法
@@ -513,7 +698,7 @@ static UIWindow *browserWindow;
     __weak typeof(self) weakSelf = self;
     
     cell.longClickBlock = ^{
-      
+        
         if (!weakSelf) return ;
         
         if (weakSelf.browser.longClickBlock) weakSelf.browser.longClickBlock(weakSelf.browser , weakSelf.currentIndex);
@@ -831,8 +1016,6 @@ static UIWindow *browserWindow;
     
     UIImage *image = self.imageView.image;
     
-    if (!image) return;
-    
     CGFloat width =  image.size.width;
     
     CGFloat height = image.size.height;
@@ -876,7 +1059,7 @@ static UIWindow *browserWindow;
             
             self.imageView.center = CGPointMake(scrollViewWidth * 0.5f , scrollViewHeight * 0.5f);
         }
-    
+        
     }
     
 }
@@ -913,7 +1096,7 @@ static UIWindow *browserWindow;
             
             if (self.longClickBlock) self.longClickBlock(self.imageView.image);
         }
-    
+        
     }
     
 }

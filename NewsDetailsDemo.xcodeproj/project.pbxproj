@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9B1080F41F34765300D3A7E2 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B1080F31F34765300D3A7E2 /* Photos.framework */; };
 		9B7BABF21F1CC44500F9889B /* load_image.png in Resources */ = {isa = PBXBuildFile; fileRef = 9B7BABF11F1CC44500F9889B /* load_image.png */; };
 		9B7BAC0E1F20588E00F9889B /* SettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B7BAC0D1F20588E00F9889B /* SettingViewController.m */; };
 		9B7BAC121F205D0B00F9889B /* SettingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B7BAC111F205D0B00F9889B /* SettingCell.m */; };
@@ -164,6 +165,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		9B1080F31F34765300D3A7E2 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
 		9B7BABF11F1CC44500F9889B /* load_image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = load_image.png; sourceTree = "<group>"; };
 		9B7BAC0C1F20588E00F9889B /* SettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingViewController.h; sourceTree = "<group>"; };
 		9B7BAC0D1F20588E00F9889B /* SettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingViewController.m; sourceTree = "<group>"; };
@@ -470,6 +472,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9B1080F41F34765300D3A7E2 /* Photos.framework in Frameworks */,
 				9BAA87131F14BA930064CAEB /* libz.tbd in Frameworks */,
 				9BAA87111F14BA330064CAEB /* libsqlite3.tbd in Frameworks */,
 			);
@@ -1145,6 +1148,7 @@
 		9BAA870F1F14BA330064CAEB /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				9B1080F31F34765300D3A7E2 /* Photos.framework */,
 				9BAA87121F14BA930064CAEB /* libz.tbd */,
 				9BAA87101F14BA330064CAEB /* libsqlite3.tbd */,
 			);

@@ -1172,7 +1172,6 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
                     break;
             }
             
-            
         }
         
     }];
