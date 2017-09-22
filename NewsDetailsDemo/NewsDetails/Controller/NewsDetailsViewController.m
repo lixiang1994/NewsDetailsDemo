@@ -128,6 +128,13 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
     [self.headerView updateHeight];
 }
 
+- (void)viewSafeAreaInsetsDidChange{
+    
+    [super viewSafeAreaInsetsDidChange];
+    
+    self.tableView.scrollIndicatorInsets = UIEdgeInsetsMake(0, 0, VIEWSAFEAREAINSETS(self.view).bottom, 0);
+}
+
 #pragma mark - 设置NavigationBar
 
 - (void)configNavigationBar{
@@ -169,7 +176,7 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
     
     [_moreButton addTarget:self action:@selector(moreButtonAction) forControlEvents:UIControlEventTouchUpInside];
     
-    [self.navigationBar addSubview:_moreButton];
+    [self.navigationBar.contentView addSubview:_moreButton];
     
     
     _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 64, self.view.width, self.view.height - 64) style:UITableViewStyleGrouped];
@@ -183,6 +190,17 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
     _tableView.separatorInset = UIEdgeInsetsMake(0, 50.0f, 0, 0);
     
     _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    
+    if (@available(iOS 11.0, *)) {
+        
+        _tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+    }
+    
+    _tableView.estimatedRowHeight = 0;
+    
+    _tableView.estimatedSectionHeaderHeight = 0;
+    
+    _tableView.estimatedSectionFooterHeight = 0;
     
     [_tableView registerClass:[NewsDetailsADCell class] forCellReuseIdentifier:ADSectionID];
     
@@ -209,13 +227,13 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
 - (void)configAutoLayout{
     
     self.moreButton.sd_layout
-    .bottomSpaceToView(self.navigationBar , 7.0f)
-    .rightSpaceToView(self.navigationBar , 7.0f)
+    .bottomSpaceToView(self.navigationBar.contentView , 7.0f)
+    .rightSpaceToView(self.navigationBar.contentView , 7.0f)
     .widthIs(30.0f)
     .heightIs(30.0f);
     
     self.tableView.sd_layout
-    .topSpaceToView(self.view, 64.0f)
+    .topSpaceToView(self.navigationBar, 0.0f)
     .bottomSpaceToView(self.view, 0.0f)
     .leftSpaceToView(self.view, 0.0f)
     .rightSpaceToView(self.view, 0.0);

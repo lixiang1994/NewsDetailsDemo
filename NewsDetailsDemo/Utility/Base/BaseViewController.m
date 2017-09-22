@@ -71,7 +71,14 @@
     
     [super viewDidLayoutSubviews];
     
-    if (_navigationBar) _navigationBar.frame = CGRectMake(0, 0, self.view.width, 64.0f);
+    if (_navigationBar) _navigationBar.frame = CGRectMake(0, 0, self.view.width, self.navigationBar.frame.size.height);
+}
+
+- (void)viewSafeAreaInsetsDidChange{
+    
+    [super viewSafeAreaInsetsDidChange];
+    
+    if (_navigationBar) _navigationBar.frame = CGRectMake(0, 0, self.view.width, VIEWSAFEAREAINSETS(self.view).top + 44.0f);
 }
 
 #pragma mark - 初始化数据
@@ -98,51 +105,11 @@
 
 - (void)initNavigationBar{
     
-    BOOL isLine = NO;
+    _navigationBar = [[NavigationBar alloc] initWithFrame:CGRectMake(0, 0, self.view.width, [UIApplication sharedApplication].statusBarFrame.size.height + 44.0f)];
     
-    _navigationBar = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.width, 64.0f)];
+    _navigationBar.navigationBarStyleType = self.navigationBarStyleType;
     
     [self.view addSubview:_navigationBar];
-    
-    switch (self.navigationBarStyleType) {
-        
-        case NavigationBarStyleTypeNormal:
-            
-            self.navigationBar.backgroundColor = [UIColor clearColor];
-            
-            isLine = NO;
-            
-            break;
-            
-        case NavigationBarStyleTypeRed:
-            
-            self.navigationBar.backgroundColor = LEEColorHex(@"EA1F1F");
-            
-            isLine = YES;
-            
-            break;
-            
-        case NavigationBarStyleTypeWhite:
-            
-            self.navigationBar.lee_theme
-            .LeeAddBackgroundColor(THEME_DAY, HEX_FFFFFF)
-            .LeeAddBackgroundColor(THEME_NIGHT, HEX_303030)
-            .LeeAddCustomConfig(THEME_DAY, ^(id item) {
-                
-                [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
-            })
-            .LeeAddCustomConfig(THEME_NIGHT, ^(id item) {
-                
-                [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:YES];
-            });
-            
-            isLine = YES;
-            
-            break;
-            
-        default:
-            break;
-    }
     
     // 判断是否有标题
     
@@ -151,27 +118,6 @@
         UILabel *titleLabel = [self createTitleLabel];
         
         titleLabel.text = self.title;
-    }
-    
-    // 判断是否有分隔线
-    
-    if (isLine) {
-        
-        UIView *lineView = [UIView new];
-        
-        lineView.backgroundColor = [[UIColor lightGrayColor] colorWithAlphaComponent:0.5f];
-        
-        [self.navigationBar addSubview:lineView];
-        
-        lineView.sd_layout
-        .bottomEqualToView(self.navigationBar)
-        .leftEqualToView(self.navigationBar)
-        .rightEqualToView(self.navigationBar)
-        .heightIs(0.5f);
-        
-        lineView.lee_theme
-        .LeeAddBackgroundColor(THEME_DAY, HEX_D7D7D7)
-        .LeeAddBackgroundColor(THEME_NIGHT, HEX_444444);
     }
     
     // 判断是否有返回按钮
@@ -184,7 +130,7 @@
         
         [backButton addTarget:self action:@selector(backButtonAction:) forControlEvents:UIControlEventTouchUpInside];
         
-        [self.navigationBar addSubview:backButton];
+        [self.navigationBar.contentView addSubview:backButton];
         
         if (self.navigationBarStyleType == NavigationBarStyleTypeWhite) {
             
@@ -202,8 +148,8 @@
         }
         
         backButton.sd_layout
-        .bottomEqualToView(self.navigationBar)
-        .leftEqualToView(self.navigationBar)
+        .bottomEqualToView(self.navigationBar.contentView)
+        .leftEqualToView(self.navigationBar.contentView)
         .widthIs(44.0f)
         .heightIs(44.0f);
     }
@@ -262,12 +208,12 @@
     
     titleLabel.font = [UIFont systemFontOfSize:18.0f];
     
-    [self.navigationBar addSubview:titleLabel];
+    [self.navigationBar.contentView addSubview:titleLabel];
     
     titleLabel.sd_layout
-    .bottomEqualToView(self.navigationBar)
-    .centerXEqualToView(self.navigationBar)
-    .heightIs(44.0f);
+    .topEqualToView(self.navigationBar.contentView)
+    .bottomEqualToView(self.navigationBar.contentView)
+    .centerXEqualToView(self.navigationBar.contentView);
     
     [titleLabel setSingleLineAutoResizeWithMaxWidth:self.view.width - 60.0f];
     

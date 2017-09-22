@@ -13,7 +13,7 @@
  *
  *  @author LEE
  *  @copyright    Copyright © 2016 - 2017年 lee. All rights reserved.
- *  @version    V1.1.0
+ *  @version    V1.1.3
  */
 
 #import "LEEAlert.h"
@@ -28,108 +28,7 @@
 #define VIEW_WIDTH CGRectGetWidth(self.view.frame)
 #define VIEW_HEIGHT CGRectGetHeight(self.view.frame)
 #define DEFAULTBORDERWIDTH (1.0f / [[UIScreen mainScreen] scale] + 0.02f)
-
-@interface LEEAlert ()
-
-@property (nonatomic , strong ) UIWindow *mainWindow;
-
-@property (nonatomic , strong ) LEEAlertWindow *leeWindow;
-
-@property (nonatomic , strong ) NSMutableArray <LEEAlertConfig *>*queueArray;
-
-@property (nonatomic , strong ) LEEBaseViewController *viewController;
-
-@end
-
-@protocol LEEAlertProtocol <NSObject>
-
-- (void)closeWithCompletionBlock:(void (^)())completionBlock;
-
-@end
-
-@implementation LEEAlert
-
-+ (LEEAlert *)shareManager{
-    
-    static LEEAlert *alertManager;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        
-        alertManager = [[LEEAlert alloc] init];
-    });
-    
-    return alertManager;
-}
-
-+ (LEEAlertConfig *)alert{
-    
-    LEEAlertConfig *config = [[LEEAlertConfig alloc] init];
-    
-    config.type = LEEAlertTypeAlert;
-    
-    return config;
-}
-
-+ (LEEAlertConfig *)actionsheet{
-    
-    LEEAlertConfig *config = [[LEEAlertConfig alloc] init];
-    
-//    config.type = IS_IPAD ? LEEAlertTypeAlert : LEEAlertTypeActionSheet;
-    
-    config.type = LEEAlertTypeActionSheet;
-    
-    config.config.LeeClickBackgroundClose(YES);
-    
-    return config;
-}
-
-+ (LEEAlertWindow *)getAlertWindow{
-    
-    return [LEEAlert shareManager].leeWindow;
-}
-
-+ (void)configMainWindow:(UIWindow *)window{
-    
-    if (window) [LEEAlert shareManager].mainWindow = window;
-}
-
-+ (void)closeWithCompletionBlock:(void (^)())completionBlock{
-    
-    if ([LEEAlert shareManager].queueArray.count) {
-        
-        LEEAlertConfig *item = [LEEAlert shareManager].queueArray.lastObject;
-        
-        if ([item respondsToSelector:@selector(closeWithCompletionBlock:)]) [item performSelector:@selector(closeWithCompletionBlock:) withObject:completionBlock];
-    }
-    
-}
-
-#pragma mark LazyLoading
-
-- (NSMutableArray <LEEAlertConfig *>*)queueArray{
-    
-    if (!_queueArray) _queueArray = [NSMutableArray array];
-    
-    return _queueArray;
-}
-
-- (UIWindow *)leeWindow{
-    
-    if (!_leeWindow) {
-        
-        _leeWindow = [[LEEAlertWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-        
-        _leeWindow.backgroundColor = [UIColor clearColor];
-        
-        _leeWindow.windowLevel = UIWindowLevelAlert;
-        
-        _leeWindow.hidden = YES;
-    }
-    
-    return _leeWindow;
-}
-
-@end
+#define VIEWSAFEAREAINSETS(view) ({UIEdgeInsets i; if(@available(iOS 11.0, *)) {i = view.safeAreaInsets;} else {i = UIEdgeInsetsZero;} i;})
 
 #pragma mark - ===================配置模型===================
 
@@ -161,8 +60,12 @@ typedef NS_ENUM(NSInteger, LEEBackgroundStyle) {
 @property (nonatomic , assign ) BOOL modelIsClickBackgroundClose;
 @property (nonatomic , assign ) BOOL modelIsShouldAutorotate;
 @property (nonatomic , assign ) BOOL modelIsQueue;
+@property (nonatomic , assign ) BOOL modelIsContinueQueueDisplay;
+@property (nonatomic , assign ) BOOL modelIsAvoidKeyboard;
 
 @property (nonatomic , assign ) UIEdgeInsets modelHeaderInsets;
+
+@property (nonatomic , copy ) NSString *modelIdentifier;
 
 @property (nonatomic , copy ) CGFloat (^modelMaxWidthBlock)(LEEScreenOrientationType);
 @property (nonatomic , copy ) CGFloat (^modelMaxHeightBlock)(LEEScreenOrientationType);
@@ -170,6 +73,7 @@ typedef NS_ENUM(NSInteger, LEEBackgroundStyle) {
 @property (nonatomic , copy ) void(^modelOpenAnimationConfigBlock)(void (^animatingBlock)() , void (^animatedBlock)());
 @property (nonatomic , copy ) void(^modelCloseAnimationConfigBlock)(void (^animatingBlock)() , void (^animatedBlock)());
 @property (nonatomic , copy ) void (^modelFinishConfig)();
+@property (nonatomic , copy ) void (^modelCloseComplete)();
 
 @property (nonatomic , assign ) LEEBackgroundStyle modelBackgroundStyle;
 @property (nonatomic , assign ) LEEAnimationStyle modelOpenAnimationStyle;
@@ -190,6 +94,7 @@ typedef NS_ENUM(NSInteger, LEEBackgroundStyle) {
     
     _modelActionArray = nil;
     _modelItemArray = nil;
+    _modelItemInsetsInfo = nil;
 }
 
 - (instancetype)init
@@ -219,6 +124,8 @@ typedef NS_ENUM(NSInteger, LEEBackgroundStyle) {
         _modelIsClickBackgroundClose = NO; //默认点击背景不关闭
         _modelIsShouldAutorotate = YES; //默认支持自动旋转
         _modelIsQueue = NO; //默认不加入队列
+        _modelIsContinueQueueDisplay = YES; //默认继续队列显示
+        _modelIsAvoidKeyboard = YES; //默认闪避键盘
         
         _modelBackgroundStyle = LEEBackgroundStyleTranslucent; //默认为半透明背景样式
         
@@ -702,6 +609,19 @@ typedef NS_ENUM(NSInteger, LEEBackgroundStyle) {
     
 }
 
+- (LEEConfigToString)LeeIdentifier{
+    
+    __weak typeof(self) weakSelf = self;
+    
+    return ^(NSString *string){
+        
+        if (weakSelf) weakSelf.modelIdentifier = string;
+        
+        return weakSelf;
+    };
+    
+}
+
 - (LEEConfigToBool)LeeQueue{
     
     __weak typeof(self) weakSelf = self;
@@ -722,6 +642,19 @@ typedef NS_ENUM(NSInteger, LEEBackgroundStyle) {
     return ^(NSInteger number){
         
         if (weakSelf) weakSelf.modelQueuePriority = number > 0 ? number : 0;
+        
+        return weakSelf;
+    };
+    
+}
+
+- (LEEConfigToBool)LeeContinueQueueDisplay{
+    
+    __weak typeof(self) weakSelf = self;
+    
+    return ^(BOOL is){
+        
+        if (weakSelf) weakSelf.modelIsContinueQueueDisplay = is;
         
         return weakSelf;
     };
@@ -857,6 +790,19 @@ typedef NS_ENUM(NSInteger, LEEBackgroundStyle) {
     
 }
 
+- (LEEConfigToBool)LeeAvoidKeyboard{
+    
+    __weak typeof(self) weakSelf = self;
+    
+    return ^(BOOL is){
+        
+        if (weakSelf) weakSelf.modelIsAvoidKeyboard = is;
+        
+        return weakSelf;
+    };
+    
+}
+
 #pragma mark ActionSheet Config
 
 - (LEEConfigToFloat)LeeActionSheetCancelActionSpaceWidth{
@@ -898,6 +844,18 @@ typedef NS_ENUM(NSInteger, LEEBackgroundStyle) {
     
 }
 
+- (LEEConfigToBlock)LeeCloseComplete{
+    
+    __weak typeof(self) weakSelf = self;
+    
+    return ^(void (^block)()){
+        
+        if (weakSelf) weakSelf.modelCloseComplete = block;
+        
+        return weakSelf;
+    };
+    
+}
 
 #pragma mark LazyLoading
 
@@ -920,6 +878,116 @@ typedef NS_ENUM(NSInteger, LEEBackgroundStyle) {
     if (!_modelItemInsetsInfo) _modelItemInsetsInfo = [NSMutableDictionary dictionary];
     
     return _modelItemInsetsInfo;
+}
+
+@end
+
+@interface LEEAlert ()
+
+@property (nonatomic , strong ) UIWindow *mainWindow;
+
+@property (nonatomic , strong ) LEEAlertWindow *leeWindow;
+
+@property (nonatomic , strong ) NSMutableArray <LEEAlertConfig *>*queueArray;
+
+@property (nonatomic , strong ) LEEBaseViewController *viewController;
+
+@end
+
+@protocol LEEAlertProtocol <NSObject>
+
+- (void)closeWithCompletionBlock:(void (^)())completionBlock;
+
+@end
+
+@implementation LEEAlert
+
++ (LEEAlert *)shareManager{
+    
+    static LEEAlert *alertManager;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        
+        alertManager = [[LEEAlert alloc] init];
+    });
+    
+    return alertManager;
+}
+
++ (LEEAlertConfig *)alert{
+    
+    LEEAlertConfig *config = [[LEEAlertConfig alloc] init];
+    
+    config.type = LEEAlertTypeAlert;
+    
+    return config;
+}
+
++ (LEEAlertConfig *)actionsheet{
+    
+    LEEAlertConfig *config = [[LEEAlertConfig alloc] init];
+    
+    config.type = LEEAlertTypeActionSheet;
+    
+    config.config.LeeClickBackgroundClose(YES);
+    
+    return config;
+}
+
++ (LEEAlertWindow *)getAlertWindow{
+    
+    return [LEEAlert shareManager].leeWindow;
+}
+
++ (void)configMainWindow:(UIWindow *)window{
+    
+    if (window) [LEEAlert shareManager].mainWindow = window;
+}
+
++ (void)continueQueueDisplay{
+    
+    if ([LEEAlert shareManager].queueArray.count) [LEEAlert shareManager].queueArray.lastObject.config.modelFinishConfig();
+}
+
++ (void)clearQueue{
+    
+    [[LEEAlert shareManager].queueArray removeAllObjects];
+}
+
++ (void)closeWithCompletionBlock:(void (^)())completionBlock{
+    
+    if ([LEEAlert shareManager].queueArray.count) {
+        
+        LEEAlertConfig *item = [LEEAlert shareManager].queueArray.lastObject;
+        
+        if ([item respondsToSelector:@selector(closeWithCompletionBlock:)]) [item performSelector:@selector(closeWithCompletionBlock:) withObject:completionBlock];
+    }
+    
+}
+
+#pragma mark LazyLoading
+
+- (NSMutableArray <LEEAlertConfig *>*)queueArray{
+    
+    if (!_queueArray) _queueArray = [NSMutableArray array];
+    
+    return _queueArray;
+}
+
+- (LEEAlertWindow *)leeWindow{
+    
+    if (!_leeWindow) {
+        
+        _leeWindow = [[LEEAlertWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+        
+        _leeWindow.backgroundColor = [UIColor clearColor];
+        
+        _leeWindow.windowLevel = UIWindowLevelAlert;
+        
+        _leeWindow.hidden = YES;
+    }
+    
+    return _leeWindow;
 }
 
 @end
@@ -1701,19 +1769,23 @@ static NSString *const LEEShadowViewHandleKeyBackgroundColor = @"backgroundColor
 
 - (void)keyboardWillChangeFrame:(NSNotification *)notify{
     
-    double duration = [[[notify userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+    if (self.config.modelIsAvoidKeyboard) {
+        
+        double duration = [[[notify userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+        
+        keyboardFrame = [[[notify userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+        
+        isShowingKeyboard = keyboardFrame.origin.y < SCREEN_HEIGHT;
+        
+        [UIView beginAnimations:@"keyboardWillChangeFrame" context:NULL];
+        
+        [UIView setAnimationDuration:duration];
+        
+        [self updateAlertLayout];
+        
+        [UIView commitAnimations];
+    }
     
-    keyboardFrame = [[[notify userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    
-    isShowingKeyboard = keyboardFrame.origin.y < SCREEN_HEIGHT;
-    
-    [UIView beginAnimations:@"keyboardWillChangeFrame" context:NULL];
-    
-    [UIView setAnimationDuration:duration];
-    
-    [self updateAlertLayout];
-    
-    [UIView commitAnimations];
 }
 
 - (void)viewDidLayoutSubviews{
@@ -1721,6 +1793,13 @@ static NSString *const LEEShadowViewHandleKeyBackgroundColor = @"backgroundColor
     [super viewDidLayoutSubviews];
     
     if (!self.isShowing && !self.isClosing) [self updateAlertLayout];
+}
+
+- (void)viewSafeAreaInsetsDidChange{
+    
+    [super viewSafeAreaInsetsDidChange];
+
+    [self updateAlertLayout];
 }
 
 - (void)updateAlertLayout{
@@ -1816,11 +1895,11 @@ static NSString *const LEEShadowViewHandleKeyBackgroundColor = @"backgroundColor
             
             CGRect viewFrame = view.frame;
             
-            viewFrame.origin.x = self.config.modelHeaderInsets.left + view.item.insets.left;
+            viewFrame.origin.x = self.config.modelHeaderInsets.left + view.item.insets.left + VIEWSAFEAREAINSETS(view).left;
             
             viewFrame.origin.y = alertViewHeight + view.item.insets.top;
             
-            viewFrame.size.width = alertViewMaxWidth - viewFrame.origin.x - self.config.modelHeaderInsets.right - view.item.insets.right;
+            viewFrame.size.width = alertViewMaxWidth - viewFrame.origin.x - self.config.modelHeaderInsets.right - view.item.insets.right - VIEWSAFEAREAINSETS(view).left - VIEWSAFEAREAINSETS(view).right;
             
             if ([item isKindOfClass:UILabel.class]) viewFrame.size.height = [item sizeThatFits:CGSizeMake(viewFrame.size.width, MAXFLOAT)].height;
             
@@ -2463,6 +2542,13 @@ static NSString *const LEEShadowViewHandleKeyBackgroundColor = @"backgroundColor
     if (!self.isShowing && !self.isClosing) [self updateActionSheetLayout];
 }
 
+- (void)viewSafeAreaInsetsDidChange{
+    
+    [super viewSafeAreaInsetsDidChange];
+    
+    [self updateActionSheetLayout];
+}
+
 - (void)updateActionSheetLayout{
     
     [self updateActionSheetLayoutWithViewWidth:VIEW_WIDTH ViewHeight:VIEW_HEIGHT];
@@ -2488,11 +2574,11 @@ static NSString *const LEEShadowViewHandleKeyBackgroundColor = @"backgroundColor
             
             CGRect viewFrame = view.frame;
             
-            viewFrame.origin.x = self.config.modelHeaderInsets.left + view.item.insets.left;
+            viewFrame.origin.x = self.config.modelHeaderInsets.left + view.item.insets.left + VIEWSAFEAREAINSETS(view).left;
             
             viewFrame.origin.y = actionSheetViewHeight + view.item.insets.top;
             
-            viewFrame.size.width = actionSheetViewMaxWidth - viewFrame.origin.x - self.config.modelHeaderInsets.right - view.item.insets.right;
+            viewFrame.size.width = actionSheetViewMaxWidth - viewFrame.origin.x - self.config.modelHeaderInsets.right - view.item.insets.right - VIEWSAFEAREAINSETS(view).left - VIEWSAFEAREAINSETS(view).right;
             
             if ([item isKindOfClass:UILabel.class]) viewFrame.size.height = [item sizeThatFits:CGSizeMake(viewFrame.size.width, MAXFLOAT)].height;
             
@@ -2613,7 +2699,7 @@ static NSString *const LEEShadowViewHandleKeyBackgroundColor = @"backgroundColor
     
     if (isShowed) {
         
-        containerFrame.origin.y = (viewHeight - containerFrame.size.height) - self.config.modelActionSheetBottomMargin;
+        containerFrame.origin.y = (viewHeight - containerFrame.size.height - VIEWSAFEAREAINSETS(self.view).bottom) - self.config.modelActionSheetBottomMargin;
         
     } else {
         
@@ -2978,7 +3064,7 @@ static NSString *const LEEShadowViewHandleKeyBackgroundColor = @"backgroundColor
         
         containerFrame.origin.x = (viewWidth - containerFrame.size.width) * 0.5f;
         
-        containerFrame.origin.y = (viewHeight - containerFrame.size.height) - weakSelf.config.modelActionSheetBottomMargin;
+        containerFrame.origin.y = (viewHeight - containerFrame.size.height) - weakSelf.config.modelActionSheetBottomMargin - VIEWSAFEAREAINSETS(weakSelf.view).bottom;
         
         weakSelf.containerView.frame = containerFrame;
         
@@ -3216,7 +3302,7 @@ static NSString *const LEEShadowViewHandleKeyBackgroundColor = @"backgroundColor
             })
             .LeeConfigMaxHeight(^CGFloat(LEEScreenOrientationType type) {
                 
-                return SCREEN_HEIGHT - 40.0f;
+                return SCREEN_HEIGHT - 40.0f - VIEWSAFEAREAINSETS([LEEAlert getAlertWindow]).top - VIEWSAFEAREAINSETS([LEEAlert getAlertWindow]).bottom;
             })
             .LeeOpenAnimationStyle(LEEAnimationStyleOrientationNone | LEEAnimationStyleFade | LEEAnimationStyleZoomEnlarge)
             .LeeCloseAnimationStyle(LEEAnimationStyleOrientationNone | LEEAnimationStyleFade | LEEAnimationStyleZoomShrink);
@@ -3228,11 +3314,11 @@ static NSString *const LEEShadowViewHandleKeyBackgroundColor = @"backgroundColor
             self.config
             .LeeConfigMaxWidth(^CGFloat(LEEScreenOrientationType type) {
                 
-                return type == LEEScreenOrientationTypeHorizontal ? SCREEN_HEIGHT - 20.0f : SCREEN_WIDTH - 20.0f;
+                return type == LEEScreenOrientationTypeHorizontal ? SCREEN_HEIGHT - VIEWSAFEAREAINSETS([LEEAlert getAlertWindow]).top - VIEWSAFEAREAINSETS([LEEAlert getAlertWindow]).bottom - 20.0f : SCREEN_WIDTH - VIEWSAFEAREAINSETS([LEEAlert getAlertWindow]).left - VIEWSAFEAREAINSETS([LEEAlert getAlertWindow]).right - 20.0f;
             })
             .LeeConfigMaxHeight(^CGFloat(LEEScreenOrientationType type) {
                 
-                return SCREEN_HEIGHT - 40.0f;
+                return SCREEN_HEIGHT - 40.0f - VIEWSAFEAREAINSETS([LEEAlert getAlertWindow]).top - VIEWSAFEAREAINSETS([LEEAlert getAlertWindow]).bottom;
             })
             .LeeOpenAnimationStyle(LEEAnimationStyleOrientationBottom)
             .LeeCloseAnimationStyle(LEEAnimationStyleOrientationBottom);
@@ -3301,16 +3387,14 @@ static NSString *const LEEShadowViewHandleKeyBackgroundColor = @"backgroundColor
             
             [[LEEAlert shareManager].queueArray removeObject:strongSelf];
             
-            if ([LEEAlert shareManager].queueArray.count) {
-                
-                [LEEAlert shareManager].queueArray.lastObject.config.modelFinishConfig();
-            }
+            if (strongSelf.config.modelIsContinueQueueDisplay) [LEEAlert continueQueueDisplay];
             
         } else {
             
             [[LEEAlert shareManager].queueArray removeObject:strongSelf];
         }
-
+        
+        if (strongSelf.config.modelCloseComplete) strongSelf.config.modelCloseComplete();
     };
     
 }

@@ -87,7 +87,7 @@
     
     [_settingButton addTarget:self action:@selector(settingButtonAction) forControlEvents:UIControlEventTouchUpInside];
     
-    [self.navigationBar addSubview:_settingButton];
+    [self.navigationBar.contentView addSubview:_settingButton];
     
     _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 64, self.view.width, self.view.height - 64) style:UITableViewStyleGrouped];
     
@@ -99,6 +99,17 @@
     
     _tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
     
+    if (@available(iOS 11.0, *)) {
+        
+        _tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+    }
+    
+    _tableView.estimatedRowHeight = 0;
+    
+    _tableView.estimatedSectionHeaderHeight = 0;
+    
+    _tableView.estimatedSectionFooterHeight = 0;
+    
     [_tableView registerClass:[TableViewCell class] forCellReuseIdentifier:@"CELL"];
     
     [self.view addSubview:_tableView];
@@ -109,13 +120,13 @@
 - (void)configAutoLayout{
     
     _settingButton.sd_layout
-    .bottomSpaceToView(self.navigationBar , 7.0f)
-    .rightSpaceToView(self.navigationBar , 7.0f)
+    .bottomSpaceToView(self.navigationBar.contentView , 7.0f)
+    .rightSpaceToView(self.navigationBar.contentView , 7.0f)
     .widthIs(30.0f)
     .heightIs(30.0f);
 
     _tableView.sd_layout
-    .topSpaceToView(self.view, 64.0f)
+    .topSpaceToView(self.navigationBar, 0.0f)
     .leftSpaceToView(self.view, 0.0f)
     .rightSpaceToView(self.view, 0.0f)
     .bottomSpaceToView(self.view, 0.0f);

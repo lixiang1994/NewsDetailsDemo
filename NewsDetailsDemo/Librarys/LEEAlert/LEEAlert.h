@@ -13,7 +13,7 @@
  *
  *  @author LEE
  *  @copyright    Copyright © 2016 - 2017年 lee. All rights reserved.
- *  @version    V1.1.0
+ *  @version    V1.1.3
  */
 
 #import <Foundation/Foundation.h>
@@ -73,6 +73,14 @@
 /** 设置主窗口 */
 
 + (void)configMainWindow:(UIWindow *)window;
+
+/** 继续队列显示 */
+
++ (void)continueQueueDisplay;
+
+/** 清空队列 */
+
++ (void)clearQueue;
 
 /** 关闭 */
 
@@ -165,11 +173,17 @@
 /** 设置 点击背景关闭 -> 格式: .LeeClickBackgroundClose(YES) */
 @property (nonatomic , copy , readonly ) LEEConfigToBool LeeClickBackgroundClose;
 
+/** 设置 标识 -> 格式: .LeeIdentifier(@@"ident") */
+//@property (nonatomic , copy , readonly ) LEEConfigToString LeeIdentifier;
+
 /** 设置 是否加入到队列 -> 格式: .LeeQueue(YES) */
 @property (nonatomic , copy , readonly ) LEEConfigToBool LeeQueue;
 
 /** 设置 优先级 -> 格式: .LeePriority(1000) */
 @property (nonatomic , copy , readonly ) LEEConfigToInteger LeePriority;
+
+/** 设置 是否继续队列显示 -> 格式: .LeeContinueQueue(YES) */
+@property (nonatomic , copy , readonly ) LEEConfigToBool LeeContinueQueueDisplay;
 
 /** 设置 window等级 -> 格式: .LeeWindowLevel(UIWindowLevel) */
 @property (nonatomic , copy , readonly ) LEEConfigToFloat LeeWindowLevel;
@@ -201,6 +215,9 @@
 /** 设置 添加输入框 -> 格式: .LeeAddTextField(^(UITextField *){ //code.. }) */
 @property (nonatomic , copy , readonly ) LEEConfigToConfigTextField LeeAddTextField;
 
+/** 设置 是否闪避键盘 -> 格式: .LeeAvoidKeyboard(YES) */
+@property (nonatomic , copy , readonly ) LEEConfigToBool LeeAvoidKeyboard;
+
 /** ✨actionSheet 专用设置 */
 
 /** 设置 取消动作的间隔宽度 -> 格式: .LeeActionSheetCancelActionSpaceWidth(10.0f) */
@@ -211,6 +228,11 @@
 
 /** 设置 ActionSheet距离屏幕底部的间距 -> 格式: .LeeActionSheetBottomMargin(10.0f) */
 @property (nonatomic , copy , readonly ) LEEConfigToFloat LeeActionSheetBottomMargin;
+
+
+
+/** 设置 当前关闭回调 -> 格式: .LeeCloseComplete(^{ //code.. }) */
+@property (nonatomic , copy , readonly ) LEEConfigToBlock LeeCloseComplete;
 
 @end
 

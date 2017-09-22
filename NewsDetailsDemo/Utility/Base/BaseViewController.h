@@ -10,15 +10,9 @@
 
 #import "SDAutoLayout.h"
 
-typedef NS_ENUM(NSInteger, NavigationBarStyleType) {
-    
-    /** 导航栏样式类型 正常 */
-    NavigationBarStyleTypeNormal = 0,
-    /** 导航栏样式类型 红色 */
-    NavigationBarStyleTypeRed,
-    /** 导航栏样式类型 白色*/
-    NavigationBarStyleTypeWhite,
-};
+#import "NavigationBar.h"
+
+#define VIEWSAFEAREAINSETS(view) ({UIEdgeInsets i; if(@available(iOS 11.0, *)) {i = view.safeAreaInsets;} else {i = UIEdgeInsetsZero;} i;})
 
 typedef NS_ENUM(NSInteger, NavigationBarSubViewTag) {
     
@@ -29,7 +23,7 @@ typedef NS_ENUM(NSInteger, NavigationBarSubViewTag) {
 
 @interface BaseViewController : UIViewController
 
-@property (nonatomic , strong ) UIView *navigationBar; //导航栏视图
+@property (nonatomic , strong ) NavigationBar *navigationBar; //导航栏视图
 
 @property (nonatomic , assign ) NavigationBarStyleType navigationBarStyleType; //导航栏样式类型
 

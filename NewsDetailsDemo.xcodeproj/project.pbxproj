@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		9B1080F41F34765300D3A7E2 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B1080F31F34765300D3A7E2 /* Photos.framework */; };
+		9B1C65611F75119B00EB32EC /* NavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B1C65601F75119B00EB32EC /* NavigationBar.m */; };
+		9B1C65691F75265100EB32EC /* LEEAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B1C65681F75264300EB32EC /* LEEAlert.m */; };
 		9B7BABF21F1CC44500F9889B /* load_image.png in Resources */ = {isa = PBXBuildFile; fileRef = 9B7BABF11F1CC44500F9889B /* load_image.png */; };
 		9B7BAC0E1F20588E00F9889B /* SettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B7BAC0D1F20588E00F9889B /* SettingViewController.m */; };
 		9B7BAC121F205D0B00F9889B /* SettingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B7BAC111F205D0B00F9889B /* SettingCell.m */; };
@@ -21,7 +23,6 @@
 		9BAA857B1F14B5B30064CAEB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9BAA857A1F14B5B30064CAEB /* Assets.xcassets */; };
 		9BAA857E1F14B5B30064CAEB /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9BAA857C1F14B5B30064CAEB /* LaunchScreen.storyboard */; };
 		9BAA86961F14B79C0064CAEB /* UINavigationController+FDFullscreenPopGesture.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BAA85A31F14B79C0064CAEB /* UINavigationController+FDFullscreenPopGesture.m */; };
-		9BAA86971F14B79C0064CAEB /* LEEAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BAA85A61F14B79C0064CAEB /* LEEAlert.m */; };
 		9BAA86981F14B79C0064CAEB /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 9BAA85A91F14B79C0064CAEB /* LICENSE */; };
 		9BAA86991F14B79C0064CAEB /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 9BAA85AB1F14B79C0064CAEB /* MBProgressHUD.m */; };
 		9BAA869A1F14B79C0064CAEB /* README.mdown in Sources */ = {isa = PBXBuildFile; fileRef = 9BAA85AC1F14B79C0064CAEB /* README.mdown */; };
@@ -166,6 +167,11 @@
 
 /* Begin PBXFileReference section */
 		9B1080F31F34765300D3A7E2 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
+		9B1C655F1F75119B00EB32EC /* NavigationBar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NavigationBar.h; sourceTree = "<group>"; };
+		9B1C65601F75119B00EB32EC /* NavigationBar.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NavigationBar.m; sourceTree = "<group>"; };
+		9B1C65661F75264200EB32EC /* LEEAlertHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LEEAlertHelper.h; sourceTree = "<group>"; };
+		9B1C65671F75264300EB32EC /* LEEAlert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LEEAlert.h; sourceTree = "<group>"; };
+		9B1C65681F75264300EB32EC /* LEEAlert.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LEEAlert.m; sourceTree = "<group>"; };
 		9B7BABF11F1CC44500F9889B /* load_image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = load_image.png; sourceTree = "<group>"; };
 		9B7BAC0C1F20588E00F9889B /* SettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingViewController.h; sourceTree = "<group>"; };
 		9B7BAC0D1F20588E00F9889B /* SettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingViewController.m; sourceTree = "<group>"; };
@@ -189,9 +195,6 @@
 		9BAA857F1F14B5B30064CAEB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9BAA85A21F14B79C0064CAEB /* UINavigationController+FDFullscreenPopGesture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UINavigationController+FDFullscreenPopGesture.h"; sourceTree = "<group>"; };
 		9BAA85A31F14B79C0064CAEB /* UINavigationController+FDFullscreenPopGesture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UINavigationController+FDFullscreenPopGesture.m"; sourceTree = "<group>"; };
-		9BAA85A51F14B79C0064CAEB /* LEEAlert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LEEAlert.h; sourceTree = "<group>"; };
-		9BAA85A61F14B79C0064CAEB /* LEEAlert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LEEAlert.m; sourceTree = "<group>"; };
-		9BAA85A71F14B79C0064CAEB /* LEEAlertHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LEEAlertHelper.h; sourceTree = "<group>"; };
 		9BAA85A91F14B79C0064CAEB /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		9BAA85AA1F14B79C0064CAEB /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		9BAA85AB1F14B79C0064CAEB /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
@@ -481,6 +484,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9B1C655E1F75117E00EB32EC /* NavigationBar */ = {
+			isa = PBXGroup;
+			children = (
+				9B1C655F1F75119B00EB32EC /* NavigationBar.h */,
+				9B1C65601F75119B00EB32EC /* NavigationBar.m */,
+			);
+			path = NavigationBar;
+			sourceTree = "<group>";
+		};
 		9B7BAC0A1F20587800F9889B /* Setting */ = {
 			isa = PBXGroup;
 			children = (
@@ -679,6 +691,7 @@
 		9BAA85921F14B7960064CAEB /* View */ = {
 			isa = PBXGroup;
 			children = (
+				9B1C655E1F75117E00EB32EC /* NavigationBar */,
 				9B7BAC1A1F2089C200F9889B /* YYFPS */,
 				9BAA87681F15BA2E0064CAEB /* LEECoolButton */,
 				9BAA871A1F14BD2E0064CAEB /* FontSizeView */,
@@ -734,9 +747,9 @@
 		9BAA85A41F14B79C0064CAEB /* LEEAlert */ = {
 			isa = PBXGroup;
 			children = (
-				9BAA85A51F14B79C0064CAEB /* LEEAlert.h */,
-				9BAA85A61F14B79C0064CAEB /* LEEAlert.m */,
-				9BAA85A71F14B79C0064CAEB /* LEEAlertHelper.h */,
+				9B1C65671F75264300EB32EC /* LEEAlert.h */,
+				9B1C65681F75264300EB32EC /* LEEAlert.m */,
+				9B1C65661F75264200EB32EC /* LEEAlertHelper.h */,
 			);
 			path = LEEAlert;
 			sourceTree = "<group>";
@@ -1317,6 +1330,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9B1C65691F75265100EB32EC /* LEEAlert.m in Sources */,
 				9BAA86A21F14B79C0064CAEB /* MJRefreshAutoNormalFooter.m in Sources */,
 				9BAA86FE1F14B79C0064CAEB /* YYSentinel.m in Sources */,
 				9BAA86B91F14B79C0064CAEB /* NSNotificationCenter+YYAdd.m in Sources */,
@@ -1384,7 +1398,6 @@
 				9BAA87561F14C5090064CAEB /* NewsDetailsPraiseCell.m in Sources */,
 				9BAA87621F14D3240064CAEB /* NewsDetailsHeaderFooterView.m in Sources */,
 				9BAA86E91F14B79C0064CAEB /* YYTextLayout.m in Sources */,
-				9BAA86971F14B79C0064CAEB /* LEEAlert.m in Sources */,
 				9BAA86DB1F14B79C0064CAEB /* YYFrameImage.m in Sources */,
 				9BAA86EF1F14B79C0064CAEB /* UIPasteboard+YYText.m in Sources */,
 				9BAA86A31F14B79C0064CAEB /* MJRefreshAutoStateFooter.m in Sources */,
@@ -1444,6 +1457,7 @@
 				9BAA86ED1F14B79C0064CAEB /* NSAttributedString+YYText.m in Sources */,
 				9BAA86E41F14B79C0064CAEB /* YYTextContainerView.m in Sources */,
 				9BAA86E61F14B79C0064CAEB /* YYTextEffectWindow.m in Sources */,
+				9B1C65611F75119B00EB32EC /* NavigationBar.m in Sources */,
 				9BAA869C1F14B79C0064CAEB /* MJRefreshAutoFooter.m in Sources */,
 				9BAA86D81F14B79C0064CAEB /* UIButton+YYWebImage.m in Sources */,
 				9BAA869A1F14B79C0064CAEB /* README.mdown in Sources */,

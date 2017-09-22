@@ -26,18 +26,18 @@
     
     [LEETheme defaultTheme:THEME_DAY];
     
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        
-        // 初始化FPS label (监控FPS 调试使用)
-        
-        YYFPSLabel *fps = [YYFPSLabel new];
-        
-        fps.center = CGPointMake(CGRectGetWidth(self.window.frame) / 2 - 50, 10);
-        
-        [self.window addSubview:fps];
-        
-        [self.window bringSubviewToFront:fps];
-    });
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        
+//        // 初始化FPS label (监控FPS 调试使用)
+//        
+//        YYFPSLabel *fps = [YYFPSLabel new];
+//        
+//        fps.center = CGPointMake(CGRectGetWidth(self.window.frame) / 2 - 50, 10);
+//        
+//        [self.window addSubview:fps];
+//        
+//        [self.window bringSubviewToFront:fps];
+//    });
     
     // 兼容横屏显示状态栏
     

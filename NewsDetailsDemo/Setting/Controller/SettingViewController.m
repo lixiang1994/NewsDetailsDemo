@@ -179,6 +179,17 @@
     
     _tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
     
+    if (@available(iOS 11.0, *)) {
+        
+        _tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+    }
+    
+    _tableView.estimatedRowHeight = 0;
+    
+    _tableView.estimatedSectionHeaderHeight = 0;
+    
+    _tableView.estimatedSectionFooterHeight = 0;
+    
     [_tableView registerClass:[SettingCell class] forCellReuseIdentifier:@"CELL"];
     
     [self.view addSubview:_tableView];
@@ -189,7 +200,7 @@
 - (void)configAutoLayout{
     
     _tableView.sd_layout
-    .topSpaceToView(self.view, 64.0f)
+    .topSpaceToView(self.navigationBar, 0.0f)
     .leftSpaceToView(self.view, 0.0f)
     .rightSpaceToView(self.view, 0.0f)
     .bottomSpaceToView(self.view, 0.0f);
