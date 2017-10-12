@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		9B1080F41F34765300D3A7E2 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B1080F31F34765300D3A7E2 /* Photos.framework */; };
 		9B1C65611F75119B00EB32EC /* NavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B1C65601F75119B00EB32EC /* NavigationBar.m */; };
-		9B1C65691F75265100EB32EC /* LEEAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B1C65681F75264300EB32EC /* LEEAlert.m */; };
+		9B1C658F1F8FA03400EB32EC /* LEEAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B1C658E1F8F9FD100EB32EC /* LEEAlert.m */; };
 		9B7BABF21F1CC44500F9889B /* load_image.png in Resources */ = {isa = PBXBuildFile; fileRef = 9B7BABF11F1CC44500F9889B /* load_image.png */; };
 		9B7BAC0E1F20588E00F9889B /* SettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B7BAC0D1F20588E00F9889B /* SettingViewController.m */; };
 		9B7BAC121F205D0B00F9889B /* SettingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B7BAC111F205D0B00F9889B /* SettingCell.m */; };
@@ -169,9 +169,9 @@
 		9B1080F31F34765300D3A7E2 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
 		9B1C655F1F75119B00EB32EC /* NavigationBar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NavigationBar.h; sourceTree = "<group>"; };
 		9B1C65601F75119B00EB32EC /* NavigationBar.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NavigationBar.m; sourceTree = "<group>"; };
-		9B1C65661F75264200EB32EC /* LEEAlertHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LEEAlertHelper.h; sourceTree = "<group>"; };
-		9B1C65671F75264300EB32EC /* LEEAlert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LEEAlert.h; sourceTree = "<group>"; };
-		9B1C65681F75264300EB32EC /* LEEAlert.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LEEAlert.m; sourceTree = "<group>"; };
+		9B1C658C1F8F9FD100EB32EC /* LEEAlertHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LEEAlertHelper.h; sourceTree = "<group>"; };
+		9B1C658D1F8F9FD100EB32EC /* LEEAlert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LEEAlert.h; sourceTree = "<group>"; };
+		9B1C658E1F8F9FD100EB32EC /* LEEAlert.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LEEAlert.m; sourceTree = "<group>"; };
 		9B7BABF11F1CC44500F9889B /* load_image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = load_image.png; sourceTree = "<group>"; };
 		9B7BAC0C1F20588E00F9889B /* SettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingViewController.h; sourceTree = "<group>"; };
 		9B7BAC0D1F20588E00F9889B /* SettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingViewController.m; sourceTree = "<group>"; };
@@ -747,9 +747,9 @@
 		9BAA85A41F14B79C0064CAEB /* LEEAlert */ = {
 			isa = PBXGroup;
 			children = (
-				9B1C65671F75264300EB32EC /* LEEAlert.h */,
-				9B1C65681F75264300EB32EC /* LEEAlert.m */,
-				9B1C65661F75264200EB32EC /* LEEAlertHelper.h */,
+				9B1C658D1F8F9FD100EB32EC /* LEEAlert.h */,
+				9B1C658E1F8F9FD100EB32EC /* LEEAlert.m */,
+				9B1C658C1F8F9FD100EB32EC /* LEEAlertHelper.h */,
 			);
 			path = LEEAlert;
 			sourceTree = "<group>";
@@ -1330,7 +1330,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9B1C65691F75265100EB32EC /* LEEAlert.m in Sources */,
+				9B1C658F1F8FA03400EB32EC /* LEEAlert.m in Sources */,
 				9BAA86A21F14B79C0064CAEB /* MJRefreshAutoNormalFooter.m in Sources */,
 				9BAA86FE1F14B79C0064CAEB /* YYSentinel.m in Sources */,
 				9BAA86B91F14B79C0064CAEB /* NSNotificationCenter+YYAdd.m in Sources */,

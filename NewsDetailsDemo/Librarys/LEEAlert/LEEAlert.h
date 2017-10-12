@@ -13,7 +13,7 @@
  *
  *  @author LEE
  *  @copyright    Copyright © 2016 - 2017年 lee. All rights reserved.
- *  @version    V1.1.3
+ *  @version    V1.1.4
  */
 
 #import <Foundation/Foundation.h>
@@ -84,7 +84,7 @@
 
 /** 关闭 */
 
-+ (void)closeWithCompletionBlock:(void (^)())completionBlock;
++ (void)closeWithCompletionBlock:(void (^)(void))completionBlock;
 
 @end
 
@@ -318,7 +318,7 @@
 @property (nonatomic , assign ) BOOL isClickNotClose;
 
 /** action点击事件回调Block */
-@property (nonatomic , copy ) void (^clickBlock)();
+@property (nonatomic , copy ) void (^clickBlock)(void);
 
 - (void)update;
 
