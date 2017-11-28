@@ -13,7 +13,7 @@
  *
  *  @author LEE
  *  @copyright    Copyright © 2016 - 2017年 lee. All rights reserved.
- *  @version    V1.1.4
+ *  @version    V1.1.5
  */
 
 #import "LEEAlert.h"
@@ -47,12 +47,14 @@ typedef NS_ENUM(NSInteger, LEEBackgroundStyle) {
 
 @property (nonatomic , assign ) CGFloat modelCornerRadius;
 @property (nonatomic , assign ) CGFloat modelShadowOpacity;
+@property (nonatomic , assign ) CGFloat modelShadowRadius;
 @property (nonatomic , assign ) CGFloat modelOpenAnimationDuration;
 @property (nonatomic , assign ) CGFloat modelCloseAnimationDuration;
 @property (nonatomic , assign ) CGFloat modelBackgroundStyleColorAlpha;
 @property (nonatomic , assign ) CGFloat modelWindowLevel;
 @property (nonatomic , assign ) NSInteger modelQueuePriority;
 
+@property (nonatomic , assign ) UIColor *modelShadowColor;
 @property (nonatomic , strong ) UIColor *modelHeaderColor;
 @property (nonatomic , strong ) UIColor *modelBackgroundColor;
 
@@ -63,6 +65,7 @@ typedef NS_ENUM(NSInteger, LEEBackgroundStyle) {
 @property (nonatomic , assign ) BOOL modelIsContinueQueueDisplay;
 @property (nonatomic , assign ) BOOL modelIsAvoidKeyboard;
 
+@property (nonatomic , assign ) CGSize modelShadowOffset;
 @property (nonatomic , assign ) UIEdgeInsets modelHeaderInsets;
 
 @property (nonatomic , copy ) NSString *modelIdentifier;
@@ -106,6 +109,8 @@ typedef NS_ENUM(NSInteger, LEEBackgroundStyle) {
         
         _modelCornerRadius = 13.0f; //默认圆角半径
         _modelShadowOpacity = 0.3f; //默认阴影不透明度
+        _modelShadowRadius = 5.0f; //默认阴影半径
+        _modelShadowOffset = CGSizeMake(0.0f, 2.0f); //默认阴影偏移
         _modelHeaderInsets = UIEdgeInsetsMake(20.0f, 20.0f, 20.0f, 20.0f); //默认间距
         _modelOpenAnimationDuration = 0.3f; //默认打开动画时长
         _modelCloseAnimationDuration = 0.2f; //默认关闭动画时长
@@ -118,6 +123,7 @@ typedef NS_ENUM(NSInteger, LEEBackgroundStyle) {
         _modelActionSheetCancelActionSpaceWidth = 10.0f; //默认actionsheet取消按钮间隔宽度
         _modelActionSheetBottomMargin = 10.0f; //默认actionsheet距离屏幕底部距离
         
+        _modelShadowColor = [UIColor blackColor]; //默认阴影颜色
         _modelHeaderColor = [UIColor whiteColor]; //默认颜色
         _modelBackgroundColor = [UIColor blackColor]; //默认背景半透明颜色
         
@@ -482,19 +488,6 @@ typedef NS_ENUM(NSInteger, LEEBackgroundStyle) {
     
 }
 
-- (LEEConfigToFloat)LeeShadowOpacity{
-    
-    __weak typeof(self) weakSelf = self;
-    
-    return ^(CGFloat number){
-        
-        if (weakSelf) weakSelf.modelShadowOpacity = number;
-        
-        return weakSelf;
-    };
-    
-}
-
 - (LEEConfigToFloat)LeeOpenAnimationDuration{
     
     __weak typeof(self) weakSelf = self;
@@ -603,6 +596,57 @@ typedef NS_ENUM(NSInteger, LEEBackgroundStyle) {
     return ^(BOOL is){
         
         if (weakSelf) weakSelf.modelIsClickBackgroundClose = is;
+        
+        return weakSelf;
+    };
+    
+}
+
+- (LEEConfigToSize)LeeShadowOffset{
+    
+    __weak typeof(self) weakSelf = self;
+    
+    return ^(CGSize size){
+        
+        if (weakSelf) weakSelf.modelShadowOffset = size;
+        
+        return weakSelf;
+    };
+}
+
+- (LEEConfigToFloat)LeeShadowOpacity{
+    
+    __weak typeof(self) weakSelf = self;
+    
+    return ^(CGFloat number){
+        
+        if (weakSelf) weakSelf.modelShadowOpacity = number;
+        
+        return weakSelf;
+    };
+    
+}
+
+- (LEEConfigToFloat)LeeShadowRadius{
+    
+    __weak typeof(self) weakSelf = self;
+    
+    return ^(CGFloat number){
+        
+        if (weakSelf) weakSelf.modelShadowRadius = number;
+        
+        return weakSelf;
+    };
+    
+}
+
+- (LEEConfigToColor)LeeShadowColor{
+    
+    __weak typeof(self) weakSelf = self;
+    
+    return ^(UIColor *color){
+        
+        if (weakSelf) weakSelf.modelShadowColor = color;
         
         return weakSelf;
     };
@@ -979,6 +1023,8 @@ typedef NS_ENUM(NSInteger, LEEBackgroundStyle) {
     if (!_leeWindow) {
         
         _leeWindow = [[LEEAlertWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+        
+        _leeWindow.rootViewController = [[UIViewController alloc] init];
         
         _leeWindow.backgroundColor = [UIColor clearColor];
         
@@ -1401,198 +1447,6 @@ typedef NS_ENUM(NSInteger, LEEBackgroundStyle) {
 
 @end
 
-@interface UIView (LEEShadowViewHandle)
-
-@end
-
-static NSString *const LEEShadowViewHandleKeyFrame = @"frame";
-static NSString *const LEEShadowViewHandleKeyAlpha = @"alpha";
-static NSString *const LEEShadowViewHandleKeyCenter = @"center";
-static NSString *const LEEShadowViewHandleKeyHidden = @"hidden";
-static NSString *const LEEShadowViewHandleKeyTransform = @"transform";
-static NSString *const LEEShadowViewHandleKeyBackgroundColor = @"backgroundColor";
-
-@implementation UIView (LEEShadowViewHandle)
-
-+ (void)load{
-    
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        
-        NSArray *selStringsArray = @[@"dealloc" , @"layoutSubviews" , @"removeFromSuperview"];
-        
-        [selStringsArray enumerateObjectsUsingBlock:^(NSString *selString, NSUInteger idx, BOOL *stop) {
-            
-            NSString *leeSelString = [@"lee_alert_" stringByAppendingString:selString];
-            
-            Method originalMethod = class_getInstanceMethod(self, NSSelectorFromString(selString));
-            
-            Method leeMethod = class_getInstanceMethod(self, NSSelectorFromString(leeSelString));
-            
-            BOOL isAddedMethod = class_addMethod(self, NSSelectorFromString(selString), method_getImplementation(leeMethod), method_getTypeEncoding(leeMethod));
-            
-            if (isAddedMethod) {
-            
-                class_replaceMethod(self, NSSelectorFromString(leeSelString), method_getImplementation(originalMethod), method_getTypeEncoding(originalMethod));
-            
-            } else {
-                
-                method_exchangeImplementations(originalMethod, leeMethod);
-            }
-            
-        }];
-        
-    });
-    
-}
-
-- (void)lee_alert_dealloc{
-    
-    if ([self isAddShadow]) objc_removeAssociatedObjects(self);
-    
-    [self lee_alert_dealloc];
-}
-
-- (void)lee_alert_layoutSubviews{
-    
-    if ([self isAddShadow]) [[self shadowView] layoutSubviews];
-    
-    [self lee_alert_layoutSubviews];
-}
-
-- (void)lee_alert_removeFromSuperview{
-    
-    [self removeShadow];
-    
-    [self lee_alert_removeFromSuperview];
-}
-
-- (void)cornerRadius:(CGFloat)cornerRadius{
-    
-    self.layer.cornerRadius = cornerRadius;
-
-    if ([self isAddShadow]) [self shadowView].layer.cornerRadius = cornerRadius;
-}
-
-- (void)addShadowWithShadowOpacity:(CGFloat)shadowOpacity{
-    
-    if (self.superview) {
-        
-        if (![self shadowView]) {
-            
-            UIView *shadowView = [[UIView alloc] initWithFrame:self.frame];
-            
-            shadowView.backgroundColor = self.backgroundColor;
-            
-            shadowView.layer.shadowColor = [UIColor blackColor].CGColor;
-            
-            shadowView.layer.shadowRadius = 5;
-            
-            shadowView.layer.shadowOffset = CGSizeMake(0, 2);
-            
-            shadowView.layer.shadowOpacity = shadowOpacity;
-         
-            [self.superview insertSubview:shadowView belowSubview:self];
-            
-            [self addObserver:self forKeyPath:LEEShadowViewHandleKeyFrame options:NSKeyValueObservingOptionNew context:NULL];
-            [self addObserver:self forKeyPath:LEEShadowViewHandleKeyAlpha options:NSKeyValueObservingOptionNew context:NULL];
-            [self addObserver:self forKeyPath:LEEShadowViewHandleKeyCenter options:NSKeyValueObservingOptionNew context:NULL];
-            [self addObserver:self forKeyPath:LEEShadowViewHandleKeyHidden options:NSKeyValueObservingOptionNew context:NULL];
-            [self addObserver:self forKeyPath:LEEShadowViewHandleKeyTransform options:NSKeyValueObservingOptionNew context:NULL];
-            [self addObserver:self forKeyPath:LEEShadowViewHandleKeyBackgroundColor options:NSKeyValueObservingOptionNew context:NULL];
-            
-            objc_setAssociatedObject(self, @selector(shadowView), shadowView , OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-        }
-        
-        [self setIsAddShadow:YES];
-    }
-    
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context{
-    
-    if ([keyPath isEqualToString:LEEShadowViewHandleKeyFrame]) {
-        
-        CGRect frame = [change[NSKeyValueChangeNewKey] CGRectValue];
-        
-        [self shadowView].frame = frame;
-    }
-    
-    if ([keyPath isEqualToString:LEEShadowViewHandleKeyAlpha]) {
-        
-        CGFloat alpha = [change[NSKeyValueChangeNewKey] floatValue];
-        
-        [self shadowView].alpha = alpha;
-    }
-    
-    if ([keyPath isEqualToString:LEEShadowViewHandleKeyCenter]) {
-        
-        CGPoint center = [change[NSKeyValueChangeNewKey] CGPointValue];
-        
-        [self shadowView].center = center;
-    }
-    
-    if ([keyPath isEqualToString:LEEShadowViewHandleKeyCenter]) {
-        
-        CGPoint center = [change[NSKeyValueChangeNewKey] CGPointValue];
-        
-        [self shadowView].center = center;
-    }
-    
-    if ([keyPath isEqualToString:LEEShadowViewHandleKeyHidden]) {
-        
-        bool hidden = [change[NSKeyValueChangeNewKey] boolValue];
-        
-        [self shadowView].hidden = hidden;
-    }
-    
-    if ([keyPath isEqualToString:LEEShadowViewHandleKeyTransform]) {
-        
-        CGAffineTransform transform = [change[NSKeyValueChangeNewKey] CGAffineTransformValue];
-        
-        [self shadowView].transform = transform;
-    }
-    
-    if ([keyPath isEqualToString:LEEShadowViewHandleKeyBackgroundColor]) {
-        
-        UIColor *color = change[NSKeyValueChangeNewKey];
-        
-        [self shadowView].backgroundColor = color;
-    }
-    
-}
-
-- (void)removeShadow{
-    
-    if (![self isAddShadow]) return;
-    
-    [self removeObserver:self forKeyPath:LEEShadowViewHandleKeyFrame];
-    [self removeObserver:self forKeyPath:LEEShadowViewHandleKeyAlpha];
-    [self removeObserver:self forKeyPath:LEEShadowViewHandleKeyCenter];
-    [self removeObserver:self forKeyPath:LEEShadowViewHandleKeyHidden];
-    [self removeObserver:self forKeyPath:LEEShadowViewHandleKeyTransform];
-    [self removeObserver:self forKeyPath:LEEShadowViewHandleKeyBackgroundColor];
-    
-    [[self shadowView] removeFromSuperview];
-}
-
-- (UIView *)shadowView{
-    
-    return objc_getAssociatedObject(self, _cmd);
-}
-
-- (BOOL)isAddShadow{
-    
-    return [objc_getAssociatedObject(self, _cmd) boolValue];
-}
-
-- (void)setIsAddShadow:(BOOL)isAddShadow{
-    
-    objc_setAssociatedObject(self, @selector(isAddShadow), @(isAddShadow) , OBJC_ASSOCIATION_ASSIGN);
-}
-
-@end
-
 @interface LEEBaseViewController ()<UIGestureRecognizerDelegate>
 
 @property (nonatomic , strong ) LEEAlertConfigModel *config;
@@ -2011,10 +1865,15 @@ static NSString *const LEEShadowViewHandleKeyBackgroundColor = @"backgroundColor
     
     [self.containerView addSubview: self.alertView];
     
-    [self.alertView addShadowWithShadowOpacity:self.config.modelShadowOpacity];
+    self.containerView.layer.shadowOffset = self.config.modelShadowOffset;
     
-    [self.alertView cornerRadius:self.config.modelCornerRadius];
+    self.containerView.layer.shadowRadius = self.config.modelShadowRadius;
     
+    self.containerView.layer.shadowOpacity = self.config.modelShadowOpacity;
+    
+    self.containerView.layer.shadowColor = self.config.modelShadowColor.CGColor;
+    
+    self.alertView.layer.cornerRadius = self.config.modelCornerRadius;
     
     [self.config.modelItemArray enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
        
@@ -2693,13 +2552,13 @@ static NSString *const LEEShadowViewHandleKeyBackgroundColor = @"backgroundColor
     
     containerFrame.size.width = actionSheetViewFrame.size.width;
     
-    containerFrame.size.height = actionSheetViewFrame.size.height + cancelActionTotalHeight;
+    containerFrame.size.height = actionSheetViewFrame.size.height + cancelActionTotalHeight + self.config.modelActionSheetBottomMargin;
     
     containerFrame.origin.x = (viewWidth - actionSheetViewMaxWidth) * 0.5f;
     
     if (isShowed) {
         
-        containerFrame.origin.y = (viewHeight - containerFrame.size.height - VIEWSAFEAREAINSETS(self.view).bottom) - self.config.modelActionSheetBottomMargin;
+        containerFrame.origin.y = (viewHeight - containerFrame.size.height - VIEWSAFEAREAINSETS(self.view).bottom);
         
     } else {
         
@@ -2719,10 +2578,15 @@ static NSString *const LEEShadowViewHandleKeyBackgroundColor = @"backgroundColor
     
     [self.containerView addSubview: self.actionSheetView];
     
-    [self.actionSheetView addShadowWithShadowOpacity:self.config.modelShadowOpacity];
+    self.containerView.layer.shadowOffset = self.config.modelShadowOffset;
     
-    [self.actionSheetView cornerRadius:self.config.modelCornerRadius];
+    self.containerView.layer.shadowRadius = self.config.modelShadowRadius;
     
+    self.containerView.layer.shadowOpacity = self.config.modelShadowOpacity;
+    
+    self.containerView.layer.shadowColor = self.config.modelShadowColor.CGColor;
+    
+    self.actionSheetView.layer.cornerRadius = self.config.modelCornerRadius;
     
     [self.config.modelItemArray enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
        
@@ -2854,13 +2718,11 @@ static NSString *const LEEShadowViewHandleKeyBackgroundColor = @"backgroundColor
             {
                 [button addTarget:self action:@selector(cancelButtonAction:) forControlEvents:UIControlEventTouchUpInside];
                 
+                button.layer.cornerRadius = self.config.modelCornerRadius;
+                
                 button.backgroundColor = action.backgroundColor;
                 
                 [self.containerView addSubview:button];
-                
-                [button addShadowWithShadowOpacity:self.config.modelShadowOpacity];
-                
-                [button cornerRadius:self.config.modelCornerRadius];
                 
                 self.actionSheetCancelAction = button;
                 
@@ -3355,9 +3217,9 @@ static NSString *const LEEShadowViewHandleKeyBackgroundColor = @"backgroundColor
     
     [LEEAlert shareManager].viewController.config = self.config;
     
-    [LEEAlert shareManager].leeWindow.windowLevel = self.config.modelWindowLevel;
-    
     [LEEAlert shareManager].leeWindow.rootViewController = [LEEAlert shareManager].viewController;
+    
+    [LEEAlert shareManager].leeWindow.windowLevel = self.config.modelWindowLevel;
     
     [LEEAlert shareManager].leeWindow.hidden = NO;
     
