@@ -649,6 +649,7 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
     })
     .LeeHeaderInsets(UIEdgeInsetsMake(0, 0, 0, 0))
     .LeeActionSheetBottomMargin(0.0f)
+    .LeeActionSheetBackgroundColor([UIColor whiteColor])
     .LeeCornerRadius(0.0f)
     .LeeConfigMaxWidth(^CGFloat(LEEScreenOrientationType type) {
         
