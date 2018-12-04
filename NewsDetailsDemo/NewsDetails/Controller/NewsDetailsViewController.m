@@ -707,6 +707,7 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
     })
     .LeeHeaderInsets(UIEdgeInsetsMake(0, 0, 0, 0))
     .LeeActionSheetBottomMargin(0.0f)
+    .LeeActionSheetBackgroundColor([UIColor whiteColor])
     .LeeCornerRadius(0.0f)
     .LeeConfigMaxWidth(^CGFloat(LEEScreenOrientationType type) {
         
@@ -761,6 +762,7 @@ static NSString *const AllCommentSectionID = @"AllCommentSection";
     .LeeHeaderInsets(UIEdgeInsetsMake(10, 0, 0, 0))
     .LeeHeaderColor([UIColor colorWithRed:243/255.0f green:243/255.0f blue:243/255.0f alpha:1.0f])
     .LeeActionSheetBottomMargin(0.0f) // 设置底部距离屏幕的边距为0
+    .LeeActionSheetBackgroundColor([UIColor whiteColor])
     .LeeCornerRadius(0.0f) // 设置圆角曲率为0
     .LeeConfigMaxWidth(^CGFloat(LEEScreenOrientationType type) {
         

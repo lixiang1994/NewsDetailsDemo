@@ -995,6 +995,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
         })
         .LeeActionSheetCancelActionSpaceColor([UIColor colorWithWhite:0.92 alpha:1.0f]) // 设置取消按钮间隔的颜色
         .LeeActionSheetBottomMargin(0.0f) // 设置底部距离屏幕的边距为0
+        .LeeActionSheetBackgroundColor([UIColor whiteColor])
         .LeeCornerRadius(0.0f) // 设置圆角曲率为0
         .LeeConfigMaxWidth(^CGFloat(LEEScreenOrientationType type) {
             
