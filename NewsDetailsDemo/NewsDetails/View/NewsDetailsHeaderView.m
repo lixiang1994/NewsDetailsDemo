@@ -628,7 +628,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
 
 #pragma mark - 加载图片
 
-- (void)loadImage:(NSInteger)index ResultBlock:(void (^)())resultBlock{
+- (void)loadImage:(NSInteger)index ResultBlock:(void (^)(void))resultBlock{
     
     __weak typeof(self) weakSelf = self;
     
@@ -827,7 +827,7 @@ static NSString *const ScriptName_loadGifImage = @"loadGifImage";
     
 }
 
-- (void)loadImageFinishHandleWithIndex:(NSInteger)index State:(ContentImageLoadState)state ImagePath:(NSString *)imagepath ResultBlock:(void (^)())resultBlock{
+- (void)loadImageFinishHandleWithIndex:(NSInteger)index State:(ContentImageLoadState)state ImagePath:(NSString *)imagepath ResultBlock:(void (^)(void))resultBlock{
     
     __weak typeof(self) weakSelf = self;
     
