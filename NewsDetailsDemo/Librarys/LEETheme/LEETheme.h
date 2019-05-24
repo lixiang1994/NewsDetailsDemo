@@ -12,8 +12,8 @@
  *  @brief  LEE主题管理
  *
  *  @author LEE
- *  @copyright    Copyright © 2016 - 2017年 lee. All rights reserved.
- *  @version    V1.1.7
+ *  @copyright    Copyright © 2016 - 2019年 lee. All rights reserved.
+ *  @version    V1.1.8
  */
 
 #import <Foundation/Foundation.h>
@@ -36,6 +36,8 @@
  *********************************************************************************
  
  */
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface LEETheme : NSObject
 
@@ -79,7 +81,7 @@
  *  @param tag 主题标签
  *  @param path 资源路径 (在Documents目录下的路径 如果资源不在Documents目录下应传入nil 例: ResourcesPath:@@"themeResources/day/")
  */
-+ (void)addThemeConfigWithJson:(NSString *)json Tag:(NSString *)tag ResourcesPath:(NSString *)path;
++ (void)addThemeConfigWithJson:(NSString *)json Tag:(NSString *)tag ResourcesPath:(NSString * _Nullable)path;
 
 /**
  *  移除主题设置
@@ -409,6 +411,7 @@
 
 @end
 
+NS_ASSUME_NONNULL_END
 
 /*
  *
